@@ -9,9 +9,9 @@ SpatialKappa
 <h4>INTRODUCTION</h4>
 
 <p>This project contains an implementation of a syntactic extension
-of Kappa to allow expression of location and transport in models. A user manual is available <a href="https://github.com/lptolik/SpatialKappa/raw/master/docs/manual/SpatialKappaManual-v2.1.0.pdf">here</a>.</p>
+of Kappa to allow expression of location and transport in models. A user manual is available [here][manual-link].</p>
 
-<p>Feel free to add bug reports or feature requests <a href="https://github.com/lptolik/SpatialKappa/issues">here</a>.</p>
+Feel free to add bug reports or feature requests [here][bug-link].</p>
 
 <h4>LICENSE</h4>
 
@@ -97,5 +97,6 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 
 
-
+[bug-link]: https://github.com/lptolik/SpatialKappa/issues
+[manual-link]: https://github.com/lptolik/SpatialKappa/raw/master/docs/manual/SpatialKappaManual-v2.1.0.pdf
 
