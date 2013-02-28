@@ -11,10 +11,11 @@ package org.demonsoft.spatialkappa.parser;
 
 import org.demonsoft.spatialkappa.model.Agent;
 import org.demonsoft.spatialkappa.model.AgentSite;
+import org.demonsoft.spatialkappa.model.AgentDeclaration;
+import org.demonsoft.spatialkappa.model.AggregateSite;
 import org.demonsoft.spatialkappa.model.BooleanExpression;
 import org.demonsoft.spatialkappa.model.CellIndexExpression;
-import org.demonsoft.spatialkappa.model.CompartmentLink;
-import org.demonsoft.spatialkappa.model.Direction;
+import org.demonsoft.spatialkappa.model.Channel;
 import org.demonsoft.spatialkappa.model.Location;
 import org.demonsoft.spatialkappa.model.IKappaModel;
 import org.demonsoft.spatialkappa.model.KappaModel;
@@ -35,88 +36,72 @@ public void setKappaModel(IKappaModel kappaModel) {
 } 
 }
 
+
 prog returns [IKappaModel result]
   @after {
     kappaModel.validate();
     $result = kappaModel;
   }
   :
-  (
-    line
-  )+
+  ^(MODEL (line)*)
   ;
 
 line
   :
-  ruleExpr
-  | compartmentExpr
-  | compartmentLinkExpr
-  | transportExpr
-  | initExpr
-  | plotExpr
-  | obsExpr
-  | varExpr
-  | modExpr
-  | agentExpr
+  agentDecl
+  | compartmentDecl
+  | channelDecl
+  | initDecl
+  | plotDecl
+  | obsDecl
+  | varDecl
+  | modDecl
+  | ruleDecl
   ;
 
-ruleExpr
-options {backtrack=true;}
+ruleDecl
   :
-  ^(TRANSFORM a=transformExpr b=kineticExpr label?)
+  ^(RULE a=transition b=rate label?)
   {
-    kappaModel.addTransform($label.result, $a.lhs, $a.rhs, $b.rate, null);
-  }
-  | ^(TRANSFORM a=transformExpr b=kineticExpr label c=locationExpr)
-  {
-    kappaModel.addTransform($label.result, $a.lhs, $a.rhs, $b.rate, $c.result );
+    kappaModel.addTransition($label.result, $a.lhsLocation, $a.lhs, $a.channel, $a.rhsLocation, $a.rhs, $b.rate);
   }
   ;
 
-transformExpr returns [List<Agent> lhs, List<Agent> rhs]
+transition returns [Location lhsLocation, List<Agent> lhs, Location rhsLocation, List<Agent> rhs, String channel]
   :
   ^(
-    t=transformTransition
-    ^(LHS a=agentGroup?)
-    ^(RHS b=agentGroup?)
+    TRANSITION
+    ^(LHS (source=location {$lhsLocation = $source.result;})? (a=agentGroup {$lhsLocation = $a.location;})?)
+    ^(RHS (target=location {$rhsLocation = $target.result;})? (b=agentGroup {$rhsLocation = $b.location;})?)
+    (^(CHANNEL channelName=id))?
    )
   {
-    $lhs = $a.result;
-    $rhs = $b.result;
-  }
-  | ^(
-    t=transformTransition
-    LHS
-    ^(RHS b=agentGroup?)
-   )
-  {
-    $lhs = null;
-    $rhs = $b.result;
-  }
-  | ^(
-    t=transformTransition
-    ^(LHS a=agentGroup?)
-    RHS
-   )
-  {
-    $lhs = $a.result;
-    $rhs = null;
+    $lhs = $a.agents;
+    $rhs = $b.agents;
+    if ($lhsLocation == null) {
+      $lhsLocation = Location.NOT_LOCATED;
+    }
+    if ($rhsLocation == null) {
+      $rhsLocation = Location.NOT_LOCATED;
+    }
+    $channel = $channelName.text;
   }
   ;
 
-agentGroup returns [List<Agent> result]
+agentGroup returns [List<Agent> agents, Location location]
   @init {
   List<Agent> agents = new ArrayList<Agent>();
   }
   :
   ^(
-    AGENTS
+    AGENTS location?
     (
       a=agent {agents.add($a.result);}
     )+
    )
   {    
-  $result = agents;
+  $location = ($location.result != null) ? $location.result : Location.NOT_LOCATED;
+  $agents = agents;
   }
   ;
 
@@ -126,25 +111,30 @@ agent returns [Agent result]
   }
   :
   ^(
-    AGENT id
+    AGENT id location?
     (
-      iface {sites.add($iface.result);}
+      agentInterface {sites.add($agentInterface.result);}
     )*
    )
   {
-    $result = new Agent($id.text, sites);
+    if ($location.result != null) {
+      $result = new Agent($id.text, $location.result, sites);
+    }
+    else {
+      $result = new Agent($id.text, Location.NOT_LOCATED, sites);
+    }
   }
   ;
 
-iface returns [AgentSite result]
+agentInterface returns [AgentSite result]
   :
-  ^(INTERFACE id a=stateExpr? b=linkExpr?)
+  ^(INTERFACE id a=state? b=link?)
   {
-    $result = new AgentSite($id.text, $a.result, $b.result);
+    $result = new AgentSite($id.text, $a.result, $b.linkName, $b.channelName);
   }
   ;
 
-stateExpr returns [String result]
+state returns [String result]
   :
   ^(STATE id)
   {
@@ -152,19 +142,26 @@ stateExpr returns [String result]
   }
   ;
 
-linkExpr returns [String result]
+link returns [String linkName, String channelName, Agent targetSite]
   :
-  ^(LINK INT)
-  {$result = $INT.text;}
+  ^(LINK (^(CHANNEL channelId=id))? INT)
+  {$linkName = $INT.text; $channelName = $channelId.text; $targetSite = null;}
   |
-  ^(LINK OCCUPIED)
-  {$result = "_";}
+  ^(LINK (^(CHANNEL channelId=id))? OCCUPIED)
+  {$linkName = "_"; $channelName = $channelId.text; $targetSite = null;}
+  |
+  ^(LINK (^(CHANNEL channelId=id))? ^(OCCUPIED_SITE ^(AGENT agentName=id ^(INTERFACE interfaceName=id))))
+  {
+  $linkName = "_"; $channelName = $channelId.text; 
+  $targetSite = new Agent($agentName.text, Location.NOT_LOCATED, new AgentSite($interfaceName.text, null, null));
+  throw new RuntimeException("!x.y syntax not supported yet");
+  }
   |
   ^(LINK ANY)
-  {$result = "?";}
+  {$linkName = "?"; $channelName = null; $targetSite = null;}
   ;
 
-kineticExpr returns [VariableExpression rate]
+rate returns [VariableExpression rate]
   :
   ^(RATE a=varAlgebraExpr)
   {
@@ -172,68 +169,101 @@ kineticExpr returns [VariableExpression rate]
   }
   ;
 
-initExpr
+initDecl
+options {backtrack=true;}
   :
-  ^(INIT agentGroup INT locationExpr?)
+  ^(INIT agentGroup INT)
   {
-    kappaModel.addInitialValue($agentGroup.result, $INT.text, $locationExpr.result);
+    kappaModel.addInitialValue($agentGroup.agents, $INT.text, $agentGroup.location);
   }
   |
-  ^(INIT agentGroup label locationExpr?)
+  ^(INIT agentGroup label)
   {
-    kappaModel.addInitialValue($agentGroup.result, new VariableReference($label.result), $locationExpr.result);
+    kappaModel.addInitialValue($agentGroup.agents, new VariableReference($label.result), $agentGroup.location);
   }
   ;
   
-agentExpr
+agentDecl
+  @init {
+  List<AggregateSite> sites = new ArrayList<AggregateSite>();
+  }
   :
-  AGENT_DECL
+  ^(AGENT_DECL id (
+      agentDeclInterface {sites.add($agentDeclInterface.result);}
+    )*
+  )
   {
-    // Do nothing for now
+    kappaModel.addAgentDeclaration(new AgentDeclaration($id.text, sites));
   }
   ;
   
-compartmentExpr
+agentDeclInterface returns [AggregateSite result]
+  @init {
+  List<String> states = new ArrayList<String>();
+  }
+  :
+  ^(INTERFACE id (
+      state {states.add($state.result);}
+    )*
+  )
+  {
+    $result = new AggregateSite($id.text, states, null);
+  }
+  ;
+
+  
+compartmentDecl
   @init {
   List<Integer> dimensions = new ArrayList<Integer>();
   }
   :
-  ^(COMPARTMENT label (^(DIMENSION INT {dimensions.add(Integer.parseInt($INT.text));}))*)
+  ^(COMPARTMENT name=id (^(TYPE type=id))? (^(DIMENSION INT {dimensions.add(Integer.parseInt($INT.text));}))*)
   {
-    kappaModel.addCompartment($label.result, dimensions);
+    kappaModel.addCompartment($name.result, $type.result, dimensions);
   }
   ;
   
-compartmentLinkExpr
-  :
-  ^(COMPARTMENT_LINK linkName=label sourceCompartment=locationExpr transportTransition targetCompartment=locationExpr)
-  {
-    kappaModel.addCompartmentLink(new CompartmentLink($linkName.result, $sourceCompartment.result, $targetCompartment.result, $transportTransition.result));
+channelDecl
+  @init {
+  Channel channel = null;
   }
-  ;
-  
-transportExpr
   :
-  ^(TRANSPORT linkName=label agentGroup? b=transportKineticExpr (transportName=label)?)
+  ^(CHANNEL (linkName=id { channel = new Channel($linkName.text); }) (channel {channel.addChannelComponent($channel.channelType, $channel.source, $channel.target);})+)
   {
-    kappaModel.addTransport($transportName.result, $linkName.result, $agentGroup.result, $b.result);
-  }
-  ;
-  
-transportKineticExpr returns [VariableExpression result]
-  :
-  ^(RATE varAlgebraExpr)
-  {
-    $result = $varAlgebraExpr.result;
+    kappaModel.addChannel(channel);
   }
   ;
 
-locationExpr returns [Location result]
+channel returns [String channelType, List<Location> source, List<Location> target]
+  :
+  ^(LOCATION_PAIR (^(TYPE type=id))? sourceLocations=locations targetLocations=locations)
+  {
+    $channelType = $type.result; $source = $sourceLocations.locations; $target = $targetLocations.locations;
+  }
+  ;
+
+locations returns [List<Location> locations]
+  @init {
+  locations = new ArrayList<Location>();
+  }
+  :
+  ^(LOCATIONS (
+      location {locations.add($location.result);}
+    )+
+  )
+  ;
+
+location returns [Location result]
   @init {
   List<CellIndexExpression> dimensions = new ArrayList<CellIndexExpression>();
   }
   :
-  ^(LOCATION name=label (compartmentIndexExpr {dimensions.add($compartmentIndexExpr.result);})*)
+  ^(LOCATION FIXED)
+  {
+    $result = Location.FIXED_LOCATION;
+  }
+  |
+  ^(LOCATION name=id (compartmentIndexExpr {dimensions.add($compartmentIndexExpr.result);})*)
   {
     $result = new Location($name.result, dimensions);
   }
@@ -248,7 +278,7 @@ compartmentIndexExpr returns [CellIndexExpression result]
   ;
 
 
-plotExpr
+plotDecl
   :
   ^(PLOT label)
   {
@@ -257,30 +287,35 @@ plotExpr
   ;
 
 
-obsExpr
-  :
-  ^(OBSERVATION agentGroup)
+obsDecl
+options {backtrack=true;}
+  : ^(OBSERVATION varAlgebraExpr label)
   {
-    kappaModel.addVariable($agentGroup.result, $agentGroup.result.toString(), null);
-    kappaModel.addPlot($agentGroup.result.toString());
+    kappaModel.addVariable($varAlgebraExpr.result, $label.result);
+    kappaModel.addPlot($label.result);
+  }
+  | ^(OBSERVATION VOXEL agentGroup label)
+  {
+    kappaModel.addVariable($agentGroup.agents, $label.result, $agentGroup.location, true);
+    kappaModel.addPlot($label.result);
   }
   | ^(OBSERVATION agentGroup label)
   {
-    kappaModel.addVariable($agentGroup.result, $label.result, null);
-    kappaModel.addPlot($label.result);
-  }
-  | ^(OBSERVATION agentGroup label locationExpr)
-  {
-    kappaModel.addVariable($agentGroup.result, $label.result, $locationExpr.result);
+    kappaModel.addVariable($agentGroup.agents, $label.result, $agentGroup.location, false);
     kappaModel.addPlot($label.result);
   }
   ;
 
-varExpr
+varDecl
   :
+  ^(VARIABLE VOXEL agentGroup label)
+  {
+    kappaModel.addVariable($agentGroup.agents, $label.result, $agentGroup.location, true);
+  }
+  |
   ^(VARIABLE agentGroup label)
   {
-    kappaModel.addVariable($agentGroup.result, $label.result, null);
+    kappaModel.addVariable($agentGroup.agents, $label.result, $agentGroup.location, false);
   }
   |
   ^(VARIABLE varAlgebraExpr label)
@@ -303,6 +338,10 @@ varAlgebraExpr returns [VariableExpression result]
   {
     $result = new VariableExpression(new VariableReference($label.result));
   }  
+  | ^(VAR_EXPR agentGroup)
+  {
+    $result = new VariableExpression($agentGroup.agents, $agentGroup.location);
+  }  
   | ^(VAR_EXPR VAR_INFINITY)  
   {
     $result = new VariableExpression(Constant.INFINITY);
@@ -315,45 +354,61 @@ varAlgebraExpr returns [VariableExpression result]
   {
     $result = new VariableExpression(SimulationToken.TIME);
   }  
+  | ^(VAR_EXPR ELAPSED_TIME)
+  {
+    $result = new VariableExpression(SimulationToken.ELAPSED_TIME);
+  }  
+  | ^(VAR_EXPR MAX_TIME)
+  {
+    $result = new VariableExpression(SimulationToken.MAX_TIME);
+  }  
   | ^(VAR_EXPR EVENTS)
   {
     $result = new VariableExpression(SimulationToken.EVENTS);
   }  
-  | ^(VAR_EXPR LOG a=varAlgebraExpr)
+  | ^(VAR_EXPR MAX_EVENTS)
+  {
+    $result = new VariableExpression(SimulationToken.MAX_EVENTS);
+  }  
+  | ^(VAR_EXPR OP_LOG a=varAlgebraExpr)
   {
     $result = new VariableExpression(VariableExpression.UnaryOperator.LOG, $a.result);
   }  
-  | ^(VAR_EXPR SIN a=varAlgebraExpr)
+  | ^(VAR_EXPR OP_SIN a=varAlgebraExpr)
   {
     $result = new VariableExpression(VariableExpression.UnaryOperator.SIN, $a.result);
   }  
-  | ^(VAR_EXPR COS a=varAlgebraExpr)
+  | ^(VAR_EXPR OP_COS a=varAlgebraExpr)
   {
     $result = new VariableExpression(VariableExpression.UnaryOperator.COS, $a.result);
   }  
-  | ^(VAR_EXPR TAN a=varAlgebraExpr)
+  | ^(VAR_EXPR OP_TAN a=varAlgebraExpr)
   {
     $result = new VariableExpression(VariableExpression.UnaryOperator.TAN, $a.result);
   }  
-  | ^(VAR_EXPR SQRT a=varAlgebraExpr)
+  | ^(VAR_EXPR OP_SQRT a=varAlgebraExpr)
   {
     $result = new VariableExpression(VariableExpression.UnaryOperator.SQRT, $a.result);
   }  
-  | ^(VAR_EXPR EXP a=varAlgebraExpr)
+  | ^(VAR_EXPR OP_EXP a=varAlgebraExpr)
   {
     $result = new VariableExpression(VariableExpression.UnaryOperator.EXP, $a.result);
   }  
-  | ^(VAR_EXPR MODULUS a=varAlgebraExpr b=varAlgebraExpr)
+  | ^(VAR_EXPR OP_ABS a=varAlgebraExpr)
   {
-    $result = new VariableExpression($a.result, VariableExpression.Operator.MODULUS, $b.result);
+    $result = new VariableExpression(VariableExpression.UnaryOperator.ABS, $a.result);
+  }  
+  | ^(VAR_EXPR OP_POWER a=varAlgebraExpr b=varAlgebraExpr)
+  {
+    $result = new VariableExpression($a.result, VariableExpression.Operator.POWER, $b.result);
   }  
   ;
 
-modExpr
+modDecl
   :
-  ^(PERTURBATION ^(CONDITION booleanExpression) effect untilExpression?)
+  ^(PERTURBATION ^(PERTURBATION_EXPR ^(CONDITION booleanExpression) effects) until?)
   {
-    kappaModel.addPerturbation(new Perturbation($booleanExpression.result, $effect.result, $untilExpression.result));
+    kappaModel.addPerturbation(new Perturbation($booleanExpression.result, $effects.result, $until.result));
   }
   ;
 
@@ -385,11 +440,23 @@ booleanExpression returns [BooleanExpression result]
   }    
   ;
   
-
-
 relationalOperator
   :
-  '<' | '>' | '='
+  '<' | '>' | '=' | '<>'
+  ;
+
+
+effects returns [List<PerturbationEffect> result]
+  @init {
+  result = new ArrayList<PerturbationEffect>();
+  }
+  :
+  ^(
+    EFFECTS
+    (
+      e=effect {result.add($e.result);}
+    )+
+   )
   ;
 
 effect returns [PerturbationEffect result]
@@ -404,11 +471,11 @@ effect returns [PerturbationEffect result]
   }    
   | ^(EFFECT ADD varAlgebraExpr agentGroup)
   {
-    $result = new PerturbationEffect(PerturbationEffect.Type.ADD, $varAlgebraExpr.result, $agentGroup.result);
+    $result = new PerturbationEffect(PerturbationEffect.Type.ADD, $varAlgebraExpr.result, $agentGroup.agents);
   }    
   | ^(EFFECT REMOVE varAlgebraExpr agentGroup)
   {
-    $result = new PerturbationEffect(PerturbationEffect.Type.REMOVE, $varAlgebraExpr.result, $agentGroup.result);
+    $result = new PerturbationEffect(PerturbationEffect.Type.REMOVE, $varAlgebraExpr.result, $agentGroup.agents);
   }    
   | ^(EFFECT SET ^(TARGET label) varAlgebraExpr)
   {
@@ -417,7 +484,7 @@ effect returns [PerturbationEffect result]
   ;
   
   
-untilExpression returns [BooleanExpression result]
+until returns [BooleanExpression result]
   :
   ^(UNTIL booleanExpression)
   {
@@ -428,17 +495,21 @@ untilExpression returns [BooleanExpression result]
 
 cellIndexExpr returns [CellIndexExpression result]
   :
-  ^(CELL_INDEX_EXPR operator a=cellIndexExpr b=cellIndexExpr)
+  ^(CELL_INDEX_EXPR op=operator_cell_index a=cellIndexExpr b=cellIndexExpr)
   {
-    $result = new CellIndexExpression($a.result, CellIndexExpression.Operator.getOperator($operator.text), $b.result);
+    $result = new CellIndexExpression($a.result, CellIndexExpression.Operator.getOperator($op.text), $b.result);
+  }    
+  | ^(CELL_INDEX_EXPR WILDCARD)
+  {
+    $result = CellIndexExpression.WILDCARD;
   }    
   | ^(CELL_INDEX_EXPR INT)
   {
     $result = new CellIndexExpression($INT.text);
   }    
-  | ^(CELL_INDEX_EXPR label)
+  | ^(CELL_INDEX_EXPR id)
   {
-    $result = new CellIndexExpression(new VariableReference($label.result));
+    $result = new CellIndexExpression(new VariableReference($id.text));
   }    
   ;
 
@@ -462,23 +533,15 @@ number
     
 operator
   :
-  ( '+' | '*' | '-' | '/' | '%' | '^' )
-  ;
-
-transformTransition returns [Direction result]
-  :
-  ( 
-    FORWARD_TRANSITION       { $result = Direction.FORWARD; }
-  )
+  ( OP_PLUS | OP_MULTIPLY | OP_MINUS | OP_DIVIDE | OP_MODULUS )
   ;
   
-transportTransition returns [Direction result]
+operator_cell_index
   :
-  ( 
-    FORWARD_TRANSITION       { $result = Direction.FORWARD; }
-    | BACKWARD_TRANSITION    { $result = Direction.BACKWARD; }
-    | EQUILIBRIUM_TRANSITION { $result = Direction.BIDIRECTIONAL; }
-  )
+  '+'
+  | '*'
+  | '-'
+  | '/'
+  | '%'
+  | '^'
   ;
-  
-

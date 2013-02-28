@@ -54,18 +54,21 @@ public class PerturbationEffect {
         }
         switch (type) {
         case ADD:
-            // TODO - upgrade to allow adding of compartment deltas (egdifferent values per cell
+            // TODO - upgrade to allow adding of compartment deltas (eg different values per cell)
             state.addComplexInstances(agents, (int) expression.evaluate(state).value);
             break;
         case REMOVE:
             state.addComplexInstances(agents, - (int) expression.evaluate(state).value);
             break;
         case SET:
-            state.setTransitionRate(transitionName, expression);
+            state.setTransitionRateOrVariable(transitionName, expression);
             break;
         case FIXED:
             if ("$STOP".equals(event)) {
                 state.stop();
+            }
+            else if ("$SNAPSHOT".equals(event)) {
+                state.snapshot();
             }
             break;
 
@@ -82,7 +85,7 @@ public class PerturbationEffect {
         case REMOVE:
             return "$DEL " + expression + " " + agents;
         case SET:
-            return "'" + transitionName + "' := " + expression;
+            return "$UPDATE '" + transitionName + "' " + expression;
         case FIXED:
             return event;
 

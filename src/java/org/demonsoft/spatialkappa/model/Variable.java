@@ -1,5 +1,11 @@
 package org.demonsoft.spatialkappa.model;
 
+import static org.demonsoft.spatialkappa.model.Location.NOT_LOCATED;
+import static org.demonsoft.spatialkappa.model.Utils.getCompartment;
+
+import java.util.List;
+import java.util.Map;
+
 public class Variable {
 
     public enum Type { VARIABLE_EXPRESSION, KAPPA_EXPRESSION, TRANSITION_LABEL }
@@ -9,6 +15,7 @@ public class Variable {
     public final Location location;
     public final Complex complex;
     public final Type type;
+    public final boolean recordVoxels;
 
     public Variable(VariableExpression expression, String label) {
         if (expression == null || label == null) {
@@ -19,10 +26,11 @@ public class Variable {
         this.location = null;
         this.complex = null;
         this.type = Type.VARIABLE_EXPRESSION;
+        this.recordVoxels = false;
     }
     
-    public Variable(Complex complex, Location location, String label) {
-        if (complex == null || label == null) {
+    public Variable(Complex complex, Location location, String label, boolean recordVoxels) {
+        if (complex == null || location == null || label == null) {
             throw new NullPointerException();
         }
         this.expression = null;
@@ -30,6 +38,7 @@ public class Variable {
         this.location = location;
         this.complex = complex;
         this.type = Type.KAPPA_EXPRESSION;
+        this.recordVoxels = recordVoxels;
     }
     
     public Variable(String label) {
@@ -41,6 +50,7 @@ public class Variable {
         this.location = null;
         this.complex = null;
         this.type = Type.TRANSITION_LABEL;
+        this.recordVoxels = false;
     }
     
     @Override
@@ -100,10 +110,10 @@ public class Variable {
             return "'" + label + "' (" + expression + ")";
             
         case KAPPA_EXPRESSION:
-            if (location == null) {
-                return "'" + label + "' (" + complex + ")";
-            }
-            return "'" + label + "' " + location + " (" + complex + ")";
+            return "'" + label + "' " + 
+            (recordVoxels ? "voxel " :  "") +
+            ((location == NOT_LOCATED) ? "" :  location + " ") +
+            "(" + complex + ")";
             
         case TRANSITION_LABEL:
             return "'" + label + "'";
@@ -128,6 +138,18 @@ public class Variable {
             throw new IllegalStateException();
         }
     }
+    
+
+    public float evaluate(Map<String, Variable> variables) {
+        switch (type) {
+        case VARIABLE_EXPRESSION:
+            return expression.evaluate(variables);
+            
+        default:
+            throw new IllegalStateException();
+        }
+    }
+
 
     public int evaluate(IKappaModel kappaModel) {
         switch (type) {
@@ -136,6 +158,31 @@ public class Variable {
             
         default:
             throw new IllegalStateException();
+        }
+    }
+
+    public void validate(List<Compartment> compartments) {
+        if (!recordVoxels) {
+            return;
+        }
+        
+        if (location == NOT_LOCATED) {
+            throw new IllegalStateException("Voxel based observation must refer to a voxel based compartment: " + label);
+        }
+        Compartment compartment = getCompartment(compartments, location.getName());
+        if (location.getDimensionCount() != 0 || compartment.getDimensions().length == 0) {
+            throw new IllegalStateException("Voxel based observation must refer to a voxel based compartment: " + label);
+        }
+        
+        for (Agent agent : complex.agents) {
+            if (agent.location != NOT_LOCATED && !location.equals(agent.location)) {
+                throw new IllegalStateException("Agents of voxel based observation must have compatible location: " + label);
+            }
+        }
+        for (AgentLink agentLink : complex.agentLinks) {
+            if (agentLink.getChannel() != null && !agentLink.isAnyLink() && !agentLink.isNoneLink() && !agentLink.isOccupiedLink()) {
+                throw new IllegalStateException("Agents of voxel based observation must be colocated in single voxel: " + label);
+            }
         }
     }
 
