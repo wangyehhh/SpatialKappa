@@ -1,0 +1,79 @@
+<project name="antlr3_and_ant" default="antlr_classpath" basedir="..">
+    <!-- properties for location of directories and files used in build -->
+    <property name="java.src.dir"   value="src/java"/>
+    <property name="build.dir"      value="build"/>
+    <property name="antgen.src.dir" value="${java.src.dir}/org/demonsoft/spatialkappa/parser"/>
+    <property name="testsrc.dir"    value="test/java"/>
+    <property name="antlr.jar.dir"  value="lib" />
+    <property name="antlr.jar.file" value="antlr-3.2.jar" />
+    <property name="antlr.jar"      value="${antlr.jar.dir}/${antlr.jar.file}" />
+	<property name="package"        value="org/apache/chemistry/opencmis/orderly"/>
+    <property name="grammar.dir"    value="src/grammar"/>
+    <property name="grammar.name"   value="SpatialKappa.g"/>
+    <property name="walker.grammar.name"   value="SpatialKappaWalker.g"/>
+    <property name="classes.dir"    value="${build.dir}/classes"/>
+    <property name="jar.dir"        value="${build.dir}/jar"/>
+	 <path id="base.path">
+	        <pathelement path="${classpath}"/>
+		    <fileset dir="${antlr.jar.dir}">
+			  <include name="${antlr.jar.file}"/>		
+		    </fileset>
+			
+	      <!-- <pathelement location="$classes"/> -->
+	    </path>
+
+	<macrodef name="antlr3">
+	<attribute name="grammar.name"/>
+	<attribute name="outputdirectory" default="${antgen.src.dir}"/>
+	<attribute name="libdirectory" default="${antlr.jar.dir}"/>
+	<attribute name="multithreaded" default="true"/>
+	<attribute name="report" default="true"/>
+	<attribute name="debug" default="false"/>
+	<sequential>
+	<antlr:ant-antlr3 xmlns:antlr="antlib:org/apache/tools/ant/antlr"
+	target="@{grammar.name}"
+	outputdirectory="@{outputdirectory}"
+	multithreaded="@{multithreaded}"
+	report="@{report}"
+	debug="@{debug}">
+	<classpath>
+	<pathelement path="${java.class.path}"/>
+	</classpath>
+	<jvmarg value="-Xmx512M"/>
+	</antlr:ant-antlr3>
+	</sequential>
+	</macrodef>
+	  
+<!-- Check if ANTLR3 can be found in the classpath -->
+<target name="antlr_classpath">
+<whichresource property="antlr.in.classpath" class="org.antlr.Tool" classpath="base.path"/>
+<fail message="ANTLR3 not found via CLASSPATH ${java.class.path}">
+<condition>
+<not>
+<isset property="antlr.in.classpath"/>
+</not>
+</condition>
+</fail>
+<echo>ANTLR3 found via CLASSPATH</echo>
+</target>
+ 
+
+	<!-- Antlr3 is called here -->
+	<target name="grammar">
+	<antlr3 grammar.name="${grammar.dir}/${grammar.name}"/>
+	</target>
+	<target name="walker" depends="grammar">
+	<antlr3 grammar.name="${grammar.dir}/${walker.grammar.name}"/>
+	</target>	 
+	<target name="compile" depends="walker" description="compile">
+	<javac srcdir="${antgen.src.dir}"
+	destdir="${classes.dir}"
+	deprecation="Yes"
+	listfiles="Yes"
+	includeantruntime="false">
+	<classpath>
+	<pathelement path="${java.class.path}"/>
+	</classpath>
+	</javac>
+	</target>
+</project>
