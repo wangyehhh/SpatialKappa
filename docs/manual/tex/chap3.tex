@@ -1,0 +1,29 @@
+\chapter{Spatial Kappa reference implementation}
+
+The algorithm implemented by Spatial Kappa simulator is similar to one described in \cite{Elf:2004fv}. In this chapter we briefly outlined main steps of the Spatial Kappa simulator algorithm.
+
+Apart from the differences accounted for the rule-based nature of the Spatial Kappa simulator, the major difference between our algorithm and the classical Next Subvolume algorithm is that there there is no difference between application of the reaction event and diffusion event. The reason for different treatment of diffusion events in the original algorithm was the optimisation of the performance: type of event defined one or two voxel states has to be updated. With introduction of multi compartmental complexes the benefit of different treatment has disappeared, so in Spatial Kappa all events are equal in terms of Gillespie algorithm. 
+
+\section{Initialization}
+Kappa language grammar and the Spatial Kappa extension are defined with ANTLR 3.0 parser generation framework (see also Appendix \ref{chap:spatialGrammar}). The grammar definition allows to perform number of initialization steps during the parsing phase, but most initialisation performed by simulator itself.
+
+Rule-based nature of the simulator allows to avoid some steps of initialisation, for example, there is no need for connectivity matrix. The channel definitions would play a role of rules defining diffusion reactions in the same way as reaction rules replace reaction definitions.
+
+The main task of initialisation step is the distribution of agents and complexes between voxels. There are two options to do this: model can define exact number of agents and complexes in particular voxel, or total amount of agents in the system. In the later case simulator will distribute agents homogeneously among all voxels of the system.
+
+The next initialisation step is to define possible applications of the reaction and diffusion rules based upon initial state of the system. In this step we need to calculate all possible mappings between rule left-hand-sides and system state and calculate activities for each of that mappings. The activity of the rule is the sum of activities of each of its mappings. Activities for all rules that has no mappings to the state of the system are set to zero.
+
+\section{Main simulation loop}
+The main simulation loop of the Spatial Kappa simulator is the same as in Next Subvolume algorithm with modifications due to rule-based nature of the model definition. There are two types of model declarations that need to be processed before ordinary rules: perturbations and infinite rate rules.
+
+\subsection{Perturbations}
+Perturbation is a standard Kappa language construct that allow model to change its state when special firing conditions are met. For example, add drug to the system at particular time point, or open the ion channel when transmembrane potential reach some value. In the Spatial Kappa simulator perturbation are checked first in the main simulation loop and if firing conditions are met then modifications to the system state are applied.
+
+\subsection{Infinite rate rules}
+It is possible to set the rate constant of rule to infinity in Spatial Kappa model. For example to compare Spatial Kappa model with ordinary Kappa model we could set infinity rate to all diffusion rules. Rules which has rate constants specified by equation could get infinity rate after application of the equation to the system state. It is obvious that infinite rate rules requires special treatment as their application do not progress the system time. In the Spatial Kappa simulator infinite rate rules are applied to the system after perturbation check until either no rules left or state of the system change too much. Application of the infinite rate rule is similar to the finite rate rule, it just do not change the system time, but due to the way they are applied infinite rate rules could significantly slow down the simulation.
+
+\subsection{Finite rate rules}
+After application of  infinite rate rules system pick one of the rules and one of that rule mappings and apply it to the system. The process of selection of the rule and one of its mapping is the same as in Next Subvolume method: simulator calculates total activity $r_{tot}=\sum_{i}{r_{i}}$ or $m_{tot}^{i}=\sum_{j}{m_{j}^{i}}$ and generate random number $rand$ uniformly distributed between 0 and 1. Choose rule (mapping) if $rand < r_{i}/r_{tot}$ ($rand < m_{j}^{i}/m_{tot}^{i}$) to pick the rule (mapping) for application.
+
+After rule application simulator change the state of the system according to the rule right-hand-side, progress the system time by the same $\Delta\tau$ as in Next Subvolume method and recalculate the rule mappings and their activities.
+
