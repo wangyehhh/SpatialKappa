@@ -1,7 +1,3 @@
-Rule-based modeling uses the rules to imply a model. It especially effective for the system with high combinatorial complexity, when relatively concise rule-set approximates the information about a complex biochemical network with enough precision. Proteins that participate in signaling cascades are normally composed of multiple subunits and binding domains. Those domains are typically promiscuous and could mediate  more than one domain-domain interaction, which results in many possible protein complexes. Domain-domain interactions, in turn, are governed by post-translational modifications that provides additional level of variety. Therefore, when conventional modelling, such as ODE, takes the molecular structure into account - model size will grow exponentially with the number of interactions.
-Instead, the graphs could conveniently  represent the structured objects (such as molecules with there sites and states) and graph- rewriting rules could approximate the interactions. 
-Graph-rewriting rule specifies edge addition or removal  when proteins are binding or unbinding. It also could change a state (label) of component to represent the post-translational modification.  Each rule accounts for the class of reactions that chemicals with common structure could share.  Only information that important for particular interaction is taken into account, so that the states of the domains that are not involved is ignored. All the reactions that are implied by one rule will be parameterized by the same rate constant, which gives the significant reduction of the model complexity.
-
 \chapter{Kappa Language Extensions}
 
 Note on terminology. In the following 'voxel' means a subunit of a defined compartment. Species is mostly used to refer to a particular agent or complex in the model.
@@ -10,34 +6,23 @@ Note on terminology. In the following 'voxel' means a subunit of a defined compa
 
 The current Kappa language consists of the following constructs, as described in the KaSim 3.1 documentation \citep{KaSimManual2012}. A more formal description of the language grammar (including the spatial extensions) is given in Appendix \ref{chap:spatialGrammar}.
 
-
-Biological/chemical objects of the model should be declared as agents and tokens. Agents represent the complex objects with multiple binding sites that can bind/unbind each other. They have a discrete number of instances. Tokens correspond to atomic particles of the model, they cannot bind to other tokens and agents, but can appear and disappear. They have continuous concentrations. 
-Agent signature should contain the information about agent that will be used in the model, such as name, number of interactions sites an their states. For instance, the line:
+\bigskip 
+\textbf{Comments}:
 
 \begin{kappasource}
-Agent: A (x,y~u~p,z~0~1~2) 
-\end{kappasource}
-
-will declare that agent A has three binding sites, from which y can exist in two states (phosphorylated and unphosphorylated) and z - in three states, 1,2 and 3.
-More generalised:
+# This is a comment
+\end{kappasource} 
 
 \textbf{Agents}:
 
 \begin{kappasource}
+AgentName
 AgentName()
 AgentName(stateWithValue~stateValue, stateWithNoValue, unboundSite, boundSite!1)
 \end{kappasource} 
 
-Declared agents are used to define the rules that describes the dynamics of the agents over time. Typical rule generally contains the left hand site and right hand site kappa expressions together with a corresponding kinetic rate. Rules could either be uni- or bi-directional. Rates could be a real numbers as well as algebraic expressions.
 
-\begin{kappasource}
-'my rule' kappa_expression -> kappa_expression @ rate
-\end{kappasource}
-
-The examples of the most common rules are shown below:
-
-
-\textbf{Transform rules}:
+\textbf{Non-spatial transition rules}:
 
 \begin{kappasource}
 'state change' A(state~old) -> A(state~new) @ 0.1
@@ -48,19 +33,14 @@ The examples of the most common rules are shown below:
 A(state~old) -> A(state~new) @ 0.1 # Unnamed transform rule
 \end{kappasource} 
 
-Initial conditions should be defined in a form of algebraic expressions that should be evaluated before the initialisation of the simulation, or variables.
-
 \textbf{Initial species values}:
 
 \begin{kappasource}
 \%init 1000 A(state~old),C()            # 1000 of each of A(..) and C()
 \%init 2000 A(bindsite!1),B(bindsite!1) # 2000 of the bound complex A(..),B(..)
-\%init 'n' (A(),A(y~p)) # will add 100 instances of A in default state A (x,y~u,z~0) and 100 A(x, y~p, z~0)
-\%var 'n' 100
-
 \end{kappasource} 
 
-\textbf{Observables and named variables}: Variables can be referenced in perturbation calculations, but do not show in outputs as observations. Observables define what you are getting as an output of the simulation.
+\textbf{Observables and named variables}: Variables can be referenced in perturbation calculations, but do not show in outputs as observations.
 
 \begin{kappasource}
 \%obs 'Label' A()  # All agents A()
@@ -71,26 +51,7 @@ Initial conditions should be defined in a form of algebraic expressions that sho
 \%var 'Named variable' B()
 \end{kappasource} 
 
-Variables could be used to trigger the perturbations during the simulation.
 
-\textbf{Perturbations}: 
-
-\begin{kappasource}
-# When simulation time exceeds 5 seconds, change the rate of transform rule
-#   named 'unbinding' to 10.0
-\%mod: \$T > 5 do ’unbinding’:= 10.0
-
-# When the species value mapped to observable 'mRNA' drops below 50
-#   set the rate of transform named 'transcribe' to 0.5
-\%mod: 'mRNA' < 50 do 'transcribe' := 0.5
-\end{kappasource} 
-
-\textbf{Currently unused}: There are some Kappa syntax elements not directly relevant to the spatial extensions, and will not appear in the extended grammar. One is a representation of causal flows, which uses the keyword \verb|%causal|.
-
-\begin{kappasource}
-\%causal: ’C@s2’ 
-\%causal: {’A..B’,’C@s1’} => ’C@s2’ 
-\end{kappasource} 
 
 \section{Concepts to encapsulate}
 
