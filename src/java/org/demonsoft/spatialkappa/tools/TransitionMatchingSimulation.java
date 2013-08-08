@@ -201,6 +201,36 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         while (!noTransitionsPossible && !stop && time < totalTime);
         notifyObservationListeners(true, 1);
     }
+    
+    public void runByTime2(float stepEndTime) {
+    	  startTime = Calendar.getInstance().getTimeInMillis();
+          stop = false;
+          maximumTime = stepEndTime;
+          maximumEventCount = 0;
+          
+          do {
+        	  float nextEventTime = time + getTimeDelta();
+              if (nextEventTime > stepEndTime) {
+            	  time = stepEndTime;
+            	  notifyObservationListeners(true, 1);
+            	  return;
+              }
+              resetTransitionsFiredCount();
+              while (time < stepEndTime && !noTransitionsPossible && !stop) {
+                  int clashes = 0;
+                  while (!runSingleEvent2(stepEndTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
+                      // repeat
+                      clashes++;
+                      Thread.yield();
+                  }
+                  if (clashes >= 1000) {
+                      System.out.println("Aborted timepoint");
+                  }
+              }
+          }
+          while (!noTransitionsPossible && !stop && time < stepEndTime);
+          notifyObservationListeners(true, 1);
+    }
 
     float getNextEndTime(float currentTime, float timePerStep) {
         int eventsSoFar = Math.round(currentTime / timePerStep);
@@ -275,6 +305,24 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return applyFiniteRateTransition();
     }
 
+    private boolean runSingleEvent2(float transitionTime) {
+        applyInfiniteRateTransitions();
+
+        
+        // Same as applyFiniteRateTransition() but without setting time;
+        Transition transition = pickFiniteRateTransition();
+        if (transition == null) {
+        	noTransitionsPossible = true;
+        	return false;
+        }	
+        if (applyTransition(transition, false)) {
+        	time = transitionTime;	
+        	return true;
+        } else {
+        	return false;
+        }
+    }
+    
     private boolean applyFiniteRateTransition() {
         Transition transition = pickFiniteRateTransition();
         if (transition == null) {
