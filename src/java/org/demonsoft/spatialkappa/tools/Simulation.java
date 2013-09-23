@@ -15,6 +15,8 @@ public interface Simulation {
 
     void runByTime(float steps, float stepSize);
 
+    void runByTime2(float stepEndTime);
+
     void stop();
 
     String getDebugOutput();

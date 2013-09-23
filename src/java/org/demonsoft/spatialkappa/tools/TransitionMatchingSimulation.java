@@ -76,7 +76,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     private final ComplexMatcher matcher = new ComplexMatcher();
     private float maximumTime;
     private int maximumEventCount;
-
+    private boolean verbose = true;
     
     public TransitionMatchingSimulation(IKappaModel kappaModel) {
         this.kappaModel = kappaModel;
@@ -203,33 +203,45 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     }
     
     public void runByTime2(float stepEndTime) {
+        if (verbose) {
+            System.out.println("runByTime2. time = " + time + " ; stepEndTime = " + stepEndTime);
+        }
     	  startTime = Calendar.getInstance().getTimeInMillis();
-          stop = false;
-          maximumTime = stepEndTime;
-          maximumEventCount = 0;
+        stop = false;
+        maximumTime = stepEndTime;
+        maximumEventCount = 0;
           
-          do {
-        	  float nextEventTime = time + getTimeDelta();
-              if (nextEventTime > stepEndTime) {
-            	  time = stepEndTime;
-            	  notifyObservationListeners(true, 1);
-            	  return;
-              }
-              resetTransitionsFiredCount();
-              while (time < stepEndTime && !noTransitionsPossible && !stop) {
-                  int clashes = 0;
-                  while (!runSingleEvent2(stepEndTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
-                      // repeat
-                      clashes++;
-                      Thread.yield();
-                  }
-                  if (clashes >= 1000) {
-                      System.out.println("Aborted timepoint");
-                  }
-              }
-          }
-          while (!noTransitionsPossible && !stop && time < stepEndTime);
-          notifyObservationListeners(true, 1);
+        do {
+            if (verbose) {
+                System.out.println("runByTime2: resetTransitionsFiredCount()");
+            }
+            resetTransitionsFiredCount();
+            while (time < stepEndTime && !noTransitionsPossible && !stop) {
+                float nextEventTime = time + getTimeDelta();
+                if (verbose) {
+                    System.out.println("runByTime2: nextEventTime = " + nextEventTime);
+                }
+                if (nextEventTime > stepEndTime) {
+                    time = stepEndTime;
+                    notifyObservationListeners(true, 1);
+                    return;
+                }
+                int clashes = 0;
+                while (!runSingleEvent2(nextEventTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
+                    // repeat
+                    clashes++;
+                    Thread.yield();
+                }
+                if (verbose) {
+                    System.out.println("Event happened. time = " + time);
+                }
+                if (clashes >= 1000) {
+                    System.out.println("Aborted timepoint");
+                }
+            }
+        }
+        while (!noTransitionsPossible && !stop && time < stepEndTime);
+        notifyObservationListeners(true, 1);
     }
 
     float getNextEndTime(float currentTime, float timePerStep) {
@@ -306,20 +318,26 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     }
 
     private boolean runSingleEvent2(float transitionTime) {
+        if (verbose) {
+            System.out.println("runSingleEvent2: transitionTime = " + transitionTime);
+        }
         applyInfiniteRateTransitions();
 
         
         // Same as applyFiniteRateTransition() but without setting time;
         Transition transition = pickFiniteRateTransition();
         if (transition == null) {
-        	noTransitionsPossible = true;
-        	return false;
+            noTransitionsPossible = true;
+            return false;
         }	
         if (applyTransition(transition, false)) {
-        	time = transitionTime;	
-        	return true;
+            time = transitionTime;	
+            if (verbose) {
+                System.out.print("runSingleEvent2: Applying transition. time = " + time + "\n");
+            }
+            return true;
         } else {
-        	return false;
+            return false;
         }
     }
     
@@ -365,7 +383,11 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     private float getTimeDelta() {
         float totalQuantity = 0;
         for (Float current : finiteRateTransitionActivityMap.values()) {
+            System.out.println("getTimeDelta: current = " + current);
             totalQuantity += current;
+        }
+        if (verbose) {
+            System.out.println("getTimeDelta: totalQuantity = " + totalQuantity);
         }
         return (float) -Math.log(Math.random()) / totalQuantity;
     }
