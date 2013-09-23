@@ -1,8 +1,10 @@
-Download 
-http://www.antlr.org/share/1169924912745/antlr3-task.zip
-Unpack
-Put ant-antlr3.jar in ~/.ant/lib
+# Download 
+# http://www.antlr.org/share/1169924912745/antlr3-task.zip
+# Unpack
+# Put ant-antlr3.jar in ~/.ant/lib
+# OR sudo apt-get install antlr3
 cd build
-CLASSPATH=/home/sterratt/src/workspace/SpatialKappa/src/lib/antlr-3.2.jar:/home/sterratt/.ant/lib/ant-antlr3.jar 
+CLASSPATH=$HOME/src/workspace/SpatialKappa/src/lib/antlr-3.2.jar:$HOME/.ant/lib/ant-antlr3.jar 
 ant # Shouldn't complain
 ant compile-all # New target created by me
+ant -f buildSpatialKappa.xml # Build the jar file
