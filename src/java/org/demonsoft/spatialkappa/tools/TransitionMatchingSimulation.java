@@ -477,6 +477,9 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                     int instanceActivity = getTransitionInstanceActivity(transitionInstance);
                     float instanceRate = getTransitionInstanceRate(transitionInstance, transition);
                     transitionInstance.totalRate = instanceActivity * instanceRate;
+                    if (transitionInstance.totalRate < 0) {
+                        throw new IllegalStateException("Negative totalRate. instanceActivity = " + instanceActivity + "; instanceRate = " + instanceRate);
+                    }
                     totalTransitionRate += transitionInstance.totalRate;
                 }
             }
@@ -517,21 +520,34 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     }
 
     void updateTransitionInstanceActivity(TransitionInstance transitionInstance) {
-        int result = 1;
+        long result = 1;
+        Integer availableCount0 = 0;
+        Integer countEntry0 = 0;
         for (Map.Entry<Complex, Integer> countEntry : transitionInstance.requiredComplexCounts.entrySet()) {
             Integer availableCount = complexStore.get(countEntry.getKey());
+            availableCount0 = availableCount;
+            countEntry0 = countEntry.getValue();
             if (availableCount == null || countEntry.getValue() > availableCount) {
                 transitionInstance.activity = 0;
                 transitionInstance.isActivitySet = true;
                 return;
             }
             for (int index=0; index < countEntry.getValue(); index++) {
+                long result0 = result;
                 result *= (availableCount--);
+                if (result < 0) {
+                    throw new IllegalStateException("Negative transitionInstance.activity = " + result + "; targetLocationCount = " + transitionInstance.targetLocationCount + " ; availableCount = " + (availableCount--) + " ; countEntry = " + countEntry.getValue() + "; index = " + index + " ; result0 = " + result0);
+                }
             }
         }
         
         result *= transitionInstance.targetLocationCount;
-        transitionInstance.activity = result;
+
+        if (result < 0) {
+                        throw new IllegalStateException("Negative transitionInstance.activity = " + result + "; targetLocationCount = " + transitionInstance.targetLocationCount + " ; availableCount = " + availableCount0 + " ; countEntry = " + countEntry0);
+                    }
+
+        transitionInstance.activity = (int)result;
         transitionInstance.isActivitySet = true;
     }
 
