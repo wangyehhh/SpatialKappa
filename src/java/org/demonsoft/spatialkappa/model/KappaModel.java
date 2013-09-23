@@ -100,6 +100,28 @@ public class KappaModel implements IKappaModel {
         return complexes;
     }
 
+    public void overrideInitialValue(List<Agent> agents, String valueText, Location location) {
+        if (agents == null || valueText == null) {
+            throw new NullPointerException();
+        }
+        if (agents.size() == 0) {
+            throw new IllegalArgumentException("Empty complex");
+        }
+        int quantity = Integer.parseInt(valueText);
+        propogateLocation(agents, location);
+        for (Agent agent : agents) {
+            aggregateAgent(agent);
+        }
+        List<Complex> complexes = getCanonicalComplexes(Utils.getComplexes(agents));
+        for (InitialValue initialValue : initialValues) {
+            if (complexes.equals(initialValue.complexes)) {
+                initialValues.remove(initialValue);
+            }
+        }
+        initialValues.add(new InitialValue(complexes, quantity, location));
+    }
+
+
     public void addVariable(List<Agent> agents, String label, Location location, boolean recordVoxels) {
         variables.put(label, new Variable(new Complex(agents), location, label, recordVoxels));
         orderedVariableNames.add(label);
