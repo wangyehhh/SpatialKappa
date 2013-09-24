@@ -474,7 +474,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
             else {
                 List<TransitionInstance> transitionInstances = transitionInstanceMap.get(transition);
                 for (TransitionInstance transitionInstance : transitionInstances) {
-                    int instanceActivity = getTransitionInstanceActivity(transitionInstance);
+                    long instanceActivity = getTransitionInstanceActivity(transitionInstance);
                     float instanceRate = getTransitionInstanceRate(transitionInstance, transition);
                     transitionInstance.totalRate = instanceActivity * instanceRate;
                     if (transitionInstance.totalRate < 0) {
@@ -512,7 +512,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     }
 
 
-    int getTransitionInstanceActivity(TransitionInstance transitionInstance) {
+    long getTransitionInstanceActivity(TransitionInstance transitionInstance) {
         if (!transitionInstance.isActivitySet) {
             throw new IllegalStateException();
         }
@@ -547,7 +547,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                         throw new IllegalStateException("Negative transitionInstance.activity = " + result + "; targetLocationCount = " + transitionInstance.targetLocationCount + " ; availableCount = " + availableCount0 + " ; countEntry = " + countEntry0);
                     }
 
-        transitionInstance.activity = (int)result;
+        transitionInstance.activity = result;
         transitionInstance.isActivitySet = true;
     }
 

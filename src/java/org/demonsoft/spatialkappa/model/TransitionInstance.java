@@ -9,7 +9,7 @@ public class TransitionInstance {
     public final List<ComplexMapping> sourceMapping;
     public final int targetLocationCount;
     public final Map<Complex, Integer> requiredComplexCounts = new HashMap<Complex, Integer>();
-    public int activity;
+    public long activity;
     public boolean isActivitySet = false;
     public float totalRate;
     
