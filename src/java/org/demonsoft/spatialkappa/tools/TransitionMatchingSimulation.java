@@ -76,7 +76,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     private final ComplexMatcher matcher = new ComplexMatcher();
     private float maximumTime;
     private int maximumEventCount;
-    private boolean verbose = true;
+    private boolean verbose = false;
     
     public TransitionMatchingSimulation(IKappaModel kappaModel) {
         this.kappaModel = kappaModel;
@@ -383,7 +383,6 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     private float getTimeDelta() {
         float totalQuantity = 0;
         for (Float current : finiteRateTransitionActivityMap.values()) {
-            System.out.println("getTimeDelta: current = " + current);
             totalQuantity += current;
         }
         if (verbose) {
