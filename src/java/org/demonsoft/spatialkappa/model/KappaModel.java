@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -113,9 +114,10 @@ public class KappaModel implements IKappaModel {
             aggregateAgent(agent);
         }
         List<Complex> complexes = getCanonicalComplexes(Utils.getComplexes(agents));
-        for (InitialValue initialValue : initialValues) {
+        for (Iterator<InitialValue> iter = initialValues.iterator(); iter.hasNext();) { 
+            InitialValue initialValue = iter.next();
             if (complexes.equals(initialValue.complexes)) {
-                initialValues.remove(initialValue);
+                iter.remove();
             }
         }
         initialValues.add(new InitialValue(complexes, quantity, location));
