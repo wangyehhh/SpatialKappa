@@ -21,7 +21,7 @@ public class InitialValue {
         if (complexes == null || location == null) {
             throw new NullPointerException();
         }
-        if (complexes.size() == 0 || quantity <= 0) {
+        if (complexes.size() == 0 || quantity < 0) {
             throw new IllegalArgumentException();
         }
 
