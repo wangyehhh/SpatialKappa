@@ -9,12 +9,16 @@ class SpatialKappa:
     gateway_client = None
 
     def __init__(self, classpath=''):
-        classpath = os.pathsep.join((classpath, os.pathsep.join(('.', '../mlm/SpatialKappa/SpatialKappa-v2.1.1.jar'))))
+        skjar_file = 'SpatialKappa-v2.1.1.jar'
+        antlrjar_file = 'ant-antlr-3.2.jar'
+        skjar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'share', 'SpatialKappa', skjar_file)
+        antlrjar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'share', 'SpatialKappa', antlrjar_file)
+        classpath = os.pathsep.join((classpath, skjar_path, antlrjar_path))
         print classpath
         self.port = jg.launch_gateway(classpath=classpath, die_on_exit=True)
         self.gateway_client = jg.GatewayClient(port=self.port)
         self.gateway = jg.JavaGateway(self.gateway_client)        
-        jg.java_import(self.gateway.jvm, 'demonsoft.spatialkappa.api.SpatialKappaSim.*')
+        jg.java_import(self.gateway.jvm, 'org.demonsoft.spatialkappa.api.SpatialKappaSim')
         print self.gateway
 
     def kappa_sim(self, time_units, verbose):

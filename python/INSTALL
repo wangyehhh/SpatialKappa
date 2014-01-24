@@ -1,7 +1,10 @@
-1. Install py4j:
+1. Install py4j, either (a) in standard system location:
    
-   easy_install py4j
-   # easy_install  --install-dir=/disk/scratch/sterratt/lib/python2.7/site-packages/ py4j
+   sudo easy_install-2.7 py4j
+
+   or (b) in a user directory, e.g.:
+   
+   easy_install-2.7  --install-dir=/disk/scratch/sterratt/lib/python2.7/site-packages/ py4j
 
 2. Install SpatialKappa python files
    
