@@ -1,3 +1,5 @@
+package org.demonsoft.spatialkappa.api;
+
 import static org.demonsoft.spatialkappa.model.Location.NOT_LOCATED;
 import org.demonsoft.spatialkappa.model.KappaModel;
 import org.demonsoft.spatialkappa.model.IKappaModel;
