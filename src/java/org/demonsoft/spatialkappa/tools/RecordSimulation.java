@@ -46,6 +46,11 @@ public class RecordSimulation implements Simulation, ObservationListener {
         simulation.runByTime(steps, stepSize);
     }
 
+    public void runByTime2(float stepEndTime) {
+        simulation.runByTime2(stepEndTime);
+    }
+
+
     public void stop() {
         simulation.stop();
     }

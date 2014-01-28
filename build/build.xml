@@ -13,12 +13,13 @@
     <property name="walker.grammar.name"   value="SpatialKappaWalker.g"/>
     <property name="classes.dir"    value="${build.dir}/classes"/>
     <property name="jar.dir"        value="${build.dir}/jar"/>
+    <property name="bin.dir"        value="bin"/>
 	 <path id="base.path">
 	        <pathelement path="${classpath}"/>
 		    <fileset dir="${antlr.jar.dir}">
 			  <include name="${antlr.jar.file}"/>		
 		    </fileset>
-			
+			  	        <pathelement path="${classpath}"/>
 	      <!-- <pathelement location="$classes"/> -->
 	    </path>
 
@@ -76,4 +77,20 @@
 	</classpath>
 	</javac>
 	</target>
+	<target name="compile-all" depends="walker" description="compile">
+	<javac srcdir="${java.src.dir}"
+	destdir="${bin.dir}"
+	deprecation="Yes"
+	listfiles="Yes"
+	includeantruntime="false">
+	<classpath>
+	<pathelement path="${java.class.path}"/>
+	<pathelement path="src/lib/commons-io-1.4.jar"/>
+	<pathelement path="src/lib/jfreechart-1.0.13.jar"/>
+	<pathelement path="src/lib/jcommon-1.0.16.jar"/>
+	</classpath>
+	</javac>
+	</target>
+
+
 </project>

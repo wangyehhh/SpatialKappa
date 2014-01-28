@@ -105,6 +105,10 @@ public class ReplaySimulation implements Simulation {
         runByEvent(0, 0);
     }
 
+    public void runByTime2(float stepEndTime) {
+        runByEvent(0, 0);
+    }
+
     public void stop() {
         stopped = true;
     }
