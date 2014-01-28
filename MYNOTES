@@ -3,10 +3,11 @@
 # Unpack
 # Put ant-antlr3.jar in ~/.ant/lib
 # OR sudo apt-get install antlr3
-cd build
-## N.B.: The CLASSPATH has to have both parts and hast to be aboslute
-## - I have no idea why!!
-export CLASSPATH=${HOME}/projects/mlm/SpatialKappa/src/lib/antlr-3.2.jar:${HOME}/.ant/lib/ant-antlr3.jar 
-ant # Shouldn't complain
-ant compile-all # New target created by me
-ant -f buildSpatialKappa.xml # Build the jar file
+
+# N.B.: The CLASSPATH has to have both parts and has to be aboslute
+CLASSPATH=$(realpath .)/src/lib/antlr-3.2.jar:$(HOME)/.ant/lib/ant-antlr3.jar 
+
+all: 
+	cd build && ant
+	cd build && CLASSPATH=$(CLASSPATH) ant compile-all
+	cd build && ant -f buildSpatialKappa.xml
