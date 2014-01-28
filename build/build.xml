@@ -78,6 +78,7 @@
 	</javac>
 	</target>
 	<target name="compile-all" depends="walker" description="compile">
+	<mkdir dir="${bin.dir}"/>
 	<javac srcdir="${java.src.dir}"
 	destdir="${bin.dir}"
 	deprecation="Yes"
