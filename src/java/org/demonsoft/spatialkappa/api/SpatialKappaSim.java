@@ -66,7 +66,7 @@ public class SpatialKappaSim
         }
     }
 
-    public void runToTime(float stepEndTime) {
+    public void runUntilTime(float stepEndTime) {
         simulation.runByTime2(stepEndTime*(float)timeMult);
         if (verbose) {
             // This allows us to get the value of a particular observable
@@ -75,9 +75,9 @@ public class SpatialKappaSim
         }
     }
 
-    public void runForDt(float dt) {
+    public void runForTime(float dt) {
         float stepEndTime = getTime() + dt;
-        runToTime(stepEndTime);
+        runUntilTime(stepEndTime);
     }
 
     public Map<String, Variable> getVariables() {
