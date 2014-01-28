@@ -1,3 +1,6 @@
+0. Make sure that the SpatialKappa jar file has been built, either
+   using Eclipse, or using the Makefile in the directory above.
+
 1. Install py4j, either (a) in standard system location:
    
    sudo easy_install-2.7 py4j
@@ -8,7 +11,7 @@
 
 2. Install SpatialKappa python files
    
-   python2.7 setup.py
+   sudo python2.7 setup.py install
    # python2.7 setup.py --prefix=${HOME}
 
 3. Run the test:
