@@ -8,7 +8,7 @@ ANTLRJAR_FILE = 'ant-antlr-3.2.jar'
 ANTLRJAR_FILE_PATH = os.path.join('..', ANTLRJAR_FILE)
 SHARE_DIR = 'SpatialKappa/share/SpatialKappa'
 try:
-    os.makedirs()
+    os.makedirs(SHARE_DIR)
 except:
     pass
 

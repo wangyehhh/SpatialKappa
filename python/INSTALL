@@ -12,7 +12,7 @@
 2. Install SpatialKappa python files
    
    sudo python2.7 setup.py install
-   # python2.7 setup.py --prefix=${HOME}
+   # python2.7 setup.py install --prefix=${HOME}
 
 3. Run the test:
 
