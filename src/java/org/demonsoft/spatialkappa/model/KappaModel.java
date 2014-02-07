@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -99,6 +100,29 @@ public class KappaModel implements IKappaModel {
         }
         return complexes;
     }
+
+    public void overrideInitialValue(List<Agent> agents, String valueText, Location location) {
+        if (agents == null || valueText == null) {
+            throw new NullPointerException();
+        }
+        if (agents.size() == 0) {
+            throw new IllegalArgumentException("Empty complex");
+        }
+        int quantity = Integer.parseInt(valueText);
+        propogateLocation(agents, location);
+        for (Agent agent : agents) {
+            aggregateAgent(agent);
+        }
+        List<Complex> complexes = getCanonicalComplexes(Utils.getComplexes(agents));
+        for (Iterator<InitialValue> iter = initialValues.iterator(); iter.hasNext();) { 
+            InitialValue initialValue = iter.next();
+            if (complexes.equals(initialValue.complexes)) {
+                iter.remove();
+            }
+        }
+        initialValues.add(new InitialValue(complexes, quantity, location));
+    }
+
 
     public void addVariable(List<Agent> agents, String label, Location location, boolean recordVoxels) {
         variables.put(label, new Variable(new Complex(agents), location, label, recordVoxels));
