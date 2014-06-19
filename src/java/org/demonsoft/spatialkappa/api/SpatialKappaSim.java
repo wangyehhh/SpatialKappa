@@ -56,8 +56,8 @@ public class SpatialKappaSim
         simulation = new TransitionMatchingSimulation(kappaModel);
     }
 
-    public void runUntilTime(float stepEndTime) {
-        simulation.runByTime2(stepEndTime*(float)timeMult);
+    public void runUntilTime(float stepEndTime, boolean progress) {
+        simulation.runByTime2(stepEndTime*(float)timeMult, progress);
         if (verbose) {
             // This allows us to get the value of a particular observable
             Observation observation = simulation.getCurrentObservation();
@@ -65,9 +65,9 @@ public class SpatialKappaSim
         }
     }
 
-    public void runForTime(float dt) {
+    public void runForTime(float dt, boolean progress) {
         float stepEndTime = getTime() + dt;
-        runUntilTime(stepEndTime);
+        runUntilTime(stepEndTime, progress);
     }
 
     public Map<String, Variable> getVariables() {
