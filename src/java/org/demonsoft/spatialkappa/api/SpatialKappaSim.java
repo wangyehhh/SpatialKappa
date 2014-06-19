@@ -118,7 +118,7 @@ public class SpatialKappaSim
         addAgent(key, (int)value);
     }
 
-    public void setAgentInitialValue(String key, double value) {
+    public void setAgentInitialValue(String key, int value) {
         List<Agent> agents = new ArrayList<Agent>();
         for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
             for (Agent currentAgent : complex.agents) {
@@ -127,13 +127,16 @@ public class SpatialKappaSim
                         System.out.println("Set number of " + currentAgent.name + " to " + value);
                     }
                     agents.add(currentAgent);
-                    kappaModel.overrideInitialValue(agents, Integer.toString((int)value), NOT_LOCATED);
+                    kappaModel.overrideInitialValue(agents, Integer.toString(value), NOT_LOCATED);
                     agents.clear();
                 }
             }
         }
         initialiseSim();
-        System.out.println("Number of " + key + " is " +  getObservation(key));
+        if (verbose) { System.out.println("Number of " + key + " is " +  getObservation(key)); }
+    }
+    public void setAgentInitialValue(String key, double value) {
+        setAgentInitialValue(key, (int)value);
     }
     
     private void getFixedLocatedInitialValuesMap() {
