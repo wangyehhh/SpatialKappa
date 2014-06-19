@@ -53,12 +53,7 @@ public class SpatialKappaSim
     }
 
     private void initialiseSim() {
-        try {
-            System.out.println("initialiseSim()");
-            simulation = new TransitionMatchingSimulation(kappaModel);
-        } catch (Exception e) {
-            System.out.println("Error in initialiseSim()");
-        }
+        simulation = new TransitionMatchingSimulation(kappaModel);
     }
 
     public void runUntilTime(float stepEndTime) {
