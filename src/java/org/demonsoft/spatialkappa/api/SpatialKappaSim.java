@@ -72,8 +72,10 @@ public class SpatialKappaSim
 
     public Map<String, Variable> getVariables() {
         Map<String, Variable> variables = kappaModel.getVariables();
-        for (Map.Entry<String, Variable> variable : variables.entrySet()) {
-            System.out.println("Key = " + variable.getKey() + ", Value = " + variable.getValue());
+        if (verbose) {
+            for (Map.Entry<String, Variable> variable : variables.entrySet()) {
+                System.out.println("Key = " + variable.getKey() + ", Value = " + variable.getValue());
+            }
         }
         return(variables);
     }
@@ -123,9 +125,7 @@ public class SpatialKappaSim
         for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
             for (Agent currentAgent : complex.agents) {
                 if (key.equals(currentAgent.name)) {
-                    if (verbose) {
-                        System.out.println("Set number of " + currentAgent.name + " to " + value);
-                    }
+                    if (verbose) { System.out.println("Set number of " + currentAgent.name + " to " + value); }
                     agents.add(currentAgent);
                     kappaModel.overrideInitialValue(agents, Integer.toString(value), NOT_LOCATED);
                     agents.clear();
@@ -139,7 +139,7 @@ public class SpatialKappaSim
         setAgentInitialValue(key, (int)value);
     }
     
-    private void getFixedLocatedInitialValuesMap() {
+    private void printFixedLocatedInitialValuesMap() {
         for (Map.Entry<Complex, Integer> result : kappaModel.getFixedLocatedInitialValuesMap().entrySet()) {
             System.out.println("Key = " + result.getKey() + ", Value = " + result.getValue());
         }
