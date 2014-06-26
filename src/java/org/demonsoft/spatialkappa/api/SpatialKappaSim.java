@@ -11,6 +11,7 @@ import org.demonsoft.spatialkappa.model.AgentDeclaration;
 import org.demonsoft.spatialkappa.model.Observation;
 import org.demonsoft.spatialkappa.model.Complex;
 import org.demonsoft.spatialkappa.model.Variable;
+import org.demonsoft.spatialkappa.model.Transition;
 import org.demonsoft.spatialkappa.model.VariableExpression;
 
 // import org.antlr.runtime.CharStream;
@@ -20,7 +21,9 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.lang.IllegalArgumentException;
 
 public class SpatialKappaSim
@@ -155,5 +158,27 @@ public class SpatialKappaSim
         for(String agentName : agentNames) {
             System.out.println(agentName + " ");
         }
+    }
+
+    public String printAgentAgentInteractions() {
+        Map<String, Set<String>> interactions = new HashMap<String, Set<String>>();
+        for (Transition transition : kappaModel.getTransitions()) {
+            List<Complex> allComplexes = new ArrayList<Complex>();
+            allComplexes.addAll(transition.sourceComplexes);
+            allComplexes.addAll(transition.targetComplexes);
+            for (Complex complex: allComplexes) {
+                for (Agent agent: complex.agents) {
+                    if (!interactions.containsKey(agent.name)) {
+                        interactions.put(agent.name, new HashSet<String>());
+                    }
+                    for (Agent coagent: complex.agents) {
+                        if (agent.name != coagent.name) {
+                            interactions.get(agent.name).add(coagent.name);
+                        }
+                    }
+                }
+            }
+        }
+        return interactions.toString();
     }
 }
