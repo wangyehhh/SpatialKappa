@@ -59,6 +59,12 @@ public class SpatialKappaSim
         simulation = new TransitionMatchingSimulation(kappaModel);
     }
 
+    // Get the time in user units
+    public float getTime() {
+        return(simulation.getTime()/(float)timeMult);
+    }
+
+    // stepEndTime is provided in user units
     public void runUntilTime(float stepEndTime, boolean progress) {
         simulation.runByTime2(stepEndTime*(float)timeMult, progress);
         if (verbose) {
@@ -68,6 +74,7 @@ public class SpatialKappaSim
         }
     }
 
+    // dt is provided in user units
     public void runForTime(float dt, boolean progress) {
         float stepEndTime = getTime() + dt;
         runUntilTime(stepEndTime, progress);
@@ -86,10 +93,6 @@ public class SpatialKappaSim
     public void setVariable(float input, String label) {
         kappaModel.addVariable(new VariableExpression(input), label);
         initialiseSim();
-    }
-
-    public float getTime() {
-        return(simulation.getTime()/(float)timeMult);
     }
 
     public double getObservation(String key) {
