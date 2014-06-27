@@ -2,7 +2,6 @@ import SpatialKappa
 import os
 import unittest
 from py4j.protocol import * 
-import random
 
 class TestSpatialKappa(unittest.TestCase):
     
