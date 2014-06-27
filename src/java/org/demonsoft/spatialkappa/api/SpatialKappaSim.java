@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.lang.IllegalArgumentException;
+import java.lang.Exception;
 
 public class SpatialKappaSim
 {
@@ -183,5 +184,48 @@ public class SpatialKappaSim
             }
         }
         return interactions.toString();
+    }
+
+    public Agent getAgent(String name) {
+        for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
+            for (Agent currentAgent : complex.agents) {
+                if (name.equals(currentAgent.name)) {
+                    return(currentAgent);
+                }
+            }
+        }
+        return (Agent) null;
+    }
+
+    public Transition getTransition(String label) {
+        return simulation.getTransition(label);
+    }
+
+    // Limited version of addTransition(), just enough to make a creation rule
+    public Transition addTransition(String label, Agent rightSideAgent, float rate) {
+        List<Transition> transitions = kappaModel.getTransitions();
+        for (Transition transition: transitions) {
+            if (label.equals(transition.label)) {
+                String error = "Transition label \"" + label + "\" already exists";
+                throw(new IllegalArgumentException(error));
+            }
+        }
+        List<Agent> rightSideAgents = new ArrayList();
+        rightSideAgents.add(rightSideAgent);
+        kappaModel.addTransition(label, null, null, null, null, rightSideAgents, new VariableExpression(rate));
+        initialiseSim();
+
+        // Returning the transition may not be strictly necessary
+        transitions = kappaModel.getTransitions();
+        for (Transition transition: transitions) {
+            if (label.equals(transition.label)) {
+                return transition;
+            }
+        }
+        return (Transition) null; 
+    }
+
+    public void setTransitionRate(String name, float rate) {
+        simulation.setTransitionRateOrVariable(name, new VariableExpression(rate));
     }
 }

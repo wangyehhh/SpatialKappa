@@ -626,7 +626,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return result;
     }
 
-    private Transition getTransition(String label) {
+    public Transition getTransition(String label) {
         for (Transition transition : getAllTransitions()) {
             if (label.equals(transition.label)) {
                 return transition;
