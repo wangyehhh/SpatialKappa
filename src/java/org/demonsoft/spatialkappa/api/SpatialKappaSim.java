@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.lang.IllegalArgumentException;
@@ -116,6 +117,28 @@ public class SpatialKappaSim
         agentSite.setLinkName(linkName);
         // kappaModel.addVariable(new VariableExpression(agents, NOT_LOCATED), agent.toString() + "?");
         kappaModel.addVariable(agents, agent.toString() + "?", NOT_LOCATED, false);
+        initialiseSim();
+    }
+
+    public void addVariableMap(Map<String,Map<String,String>> agentsMap, String label) {
+        List<Agent> agents = new ArrayList<Agent>();
+        for (Map.Entry<String,Map<String,String>> entry: agentsMap.entrySet()) {
+            String agentName = entry.getKey();
+            Map<String,String> sites = entry.getValue();
+            Agent tmpAgent = getAgent(agentName);
+            Agent agent = tmpAgent.clone();
+            for (Map.Entry<String,String> site: sites.entrySet()) {
+                String siteName = site.getKey();
+                AgentSite agentSite = agent.getSite(siteName);
+                if (agentSite == null) {
+                    String error = "Agent \"" +  agentName + "\" does not have a site \"" + siteName + "\"";
+                    throw(new IllegalArgumentException(error));
+                }
+                agentSite.setLinkName(site.getValue());
+            }
+            agents.add(agent);
+        }
+        kappaModel.addVariable(agents, label, NOT_LOCATED, false);
         initialiseSim();
     }
 

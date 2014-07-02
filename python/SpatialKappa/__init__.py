@@ -17,7 +17,7 @@ class SpatialKappa:
         print classpath
         self.port = jg.launch_gateway(classpath=classpath, die_on_exit=True)
         self.gateway_client = jg.GatewayClient(port=self.port)
-        self.gateway = jg.JavaGateway(self.gateway_client)        
+        self.gateway = jg.JavaGateway(self.gateway_client, auto_convert=True)        
 
     def kappa_sim(self, time_units, verbose):
         ks = self.gateway.jvm.org.demonsoft.spatialkappa.api.SpatialKappaSim(time_units, verbose)
