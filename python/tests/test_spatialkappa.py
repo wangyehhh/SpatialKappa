@@ -57,18 +57,27 @@ class TestSpatialKappa(unittest.TestCase):
         print TotCa1, TotCa2
 
     def test_addVariableMap(self):
-        ## Create an error
+        ## Create an error due to nonexistent site name
         error = False
         try:
-            self.sim.addVariableMap({"ca": {"nonexistent_site_name": "?"}}, 'test')
+            self.sim.addVariableMap({"ca": {"nonexistent_site_name": {"l": "?"}}}, 'test')
         except Py4JJavaError:
             error = True
         self.assertTrue(error)
-        self.sim.addVariableMap({"ca": {"x": "?"}}, 'TotCa2')
+        
+        ## Create an error due to nonexistent site attribute
+        error = False
+        try:
+            self.sim.addVariableMap({"ca": {"x": {"nonexistent_site_attribute": "?"}}}, 'test')
+        except Py4JJavaError:
+            error = True
+        self.assertTrue(error)
+
+        self.sim.addVariableMap({"ca": {"x": {"l": "?"}}}, 'TotCa2')
         TotCa1 = self.sim.getVariable("TotCa")
         TotCa2 = self.sim.getVariable("TotCa2")
         self.assertEqual(TotCa1, TotCa2)
-        self.sim.addVariableMap({"ca": {"x": "1"}, "P": {"x": "1"}}, 'P-Ca2')
+        self.sim.addVariableMap({"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}}, 'P-Ca2')
         PCa1 = self.sim.getVariable("P-Ca")
         PCa2 = self.sim.getVariable("P-Ca2")
         self.assertEqual(PCa1, PCa2)

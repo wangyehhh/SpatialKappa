@@ -120,21 +120,40 @@ public class SpatialKappaSim
         initialiseSim();
     }
 
-    public void addVariableMap(Map<String,Map<String,String>> agentsMap, String label) {
+    // This allows a variable to be set using the following syntax in python:
+    // {agent_name1: {site_name1: {"l": link_name, "s": state_name}, site_name2: {"l": link_name, "s": state_name}, ...}, agent_name2: {site_name1: {"l": link_name, "s": state_name}, ...}, ...}
+    //
+    // e.g.:
+    // {"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}}
+    public void addVariableMap(Map<String,Map<String,Map<String,String>>> agentsMap, String label) {
         List<Agent> agents = new ArrayList<Agent>();
-        for (Map.Entry<String,Map<String,String>> entry: agentsMap.entrySet()) {
+        for (Map.Entry<String,Map<String,Map<String,String>>> entry: agentsMap.entrySet()) {
             String agentName = entry.getKey();
-            Map<String,String> sites = entry.getValue();
+            Map<String,Map<String,String>> sites = entry.getValue();
             Agent tmpAgent = getAgent(agentName);
             Agent agent = tmpAgent.clone();
-            for (Map.Entry<String,String> site: sites.entrySet()) {
+            for (Map.Entry<String,Map<String,String>> site: sites.entrySet()) {
                 String siteName = site.getKey();
                 AgentSite agentSite = agent.getSite(siteName);
                 if (agentSite == null) {
                     String error = "Agent \"" +  agentName + "\" does not have a site \"" + siteName + "\"";
                     throw(new IllegalArgumentException(error));
                 }
-                agentSite.setLinkName(site.getValue());
+
+                Map<String,String> siteLinkState = site.getValue();
+                for (String key: siteLinkState.keySet()) {
+                    Set<String> validKeys = new HashSet<String>() {{add("l"); add("s");}};
+                    if (!validKeys.contains(key)) {
+                        String error = "Agent \"" +  agentName + "\" site name  \"" + siteName + "\" cannot have a \" + key + \" attribute; only \"l\" and \"s\" are valid";
+                        throw(new IllegalArgumentException(error));
+                    }
+                }
+                if (siteLinkState.keySet().contains("l")) {
+                    agentSite.setLinkName(siteLinkState.get("l"));
+                }
+                if (siteLinkState.keySet().contains("s")) {
+                    agentSite.setState(site.getValue().get("s"));
+                }
             }
             agents.add(agent);
         }
