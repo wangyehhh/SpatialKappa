@@ -7,8 +7,11 @@ import org.demonsoft.spatialkappa.tools.TransitionMatchingSimulation;
 import org.demonsoft.spatialkappa.tools.Simulation;
 import org.demonsoft.spatialkappa.model.SimulationState;
 import org.demonsoft.spatialkappa.model.Agent;
+import org.demonsoft.spatialkappa.model.AgentLink;
+import org.demonsoft.spatialkappa.model.AgentSite;
 import org.demonsoft.spatialkappa.model.AgentDeclaration;
 import org.demonsoft.spatialkappa.model.Observation;
+import org.demonsoft.spatialkappa.model.ObservationElement;
 import org.demonsoft.spatialkappa.model.Complex;
 import org.demonsoft.spatialkappa.model.Variable;
 import org.demonsoft.spatialkappa.model.Transition;
@@ -34,6 +37,7 @@ public class SpatialKappaSim
     private boolean verbose;
     public double timeMult;
 
+    // Constructors
     public SpatialKappaSim(String timeUnits, boolean verbose) {
         this.verbose = verbose;
         Map<String, Double> allowedTimeUnits = new <String, Double>HashMap();
@@ -65,6 +69,8 @@ public class SpatialKappaSim
         return(simulation.getTime()/(float)timeMult);
     }
 
+    // Run methods
+
     // stepEndTime is provided in user units
     public void runUntilTime(float stepEndTime, boolean progress) {
         simulation.runByTime2(stepEndTime*(float)timeMult, progress);
@@ -91,11 +97,29 @@ public class SpatialKappaSim
         return(variables);
     }
 
+    // Variables interface
     public void setVariable(float input, String label) {
         kappaModel.addVariable(new VariableExpression(input), label);
         initialiseSim();
     }
 
+    public double getVariable(String variableName) {
+        Variable variable = kappaModel.getVariables().get(variableName);
+        ObservationElement observable = variable.evaluate(simulation);
+        return(observable.value);
+    }
+
+    public void addVariable(Agent agent, String siteName, String linkName) {
+        List<Agent> agents = new ArrayList<Agent>();
+        agents.add(agent.clone()); 
+        AgentSite agentSite = agents.get(0).getSite(siteName);
+        agentSite.setLinkName(linkName);
+        // kappaModel.addVariable(new VariableExpression(agents, NOT_LOCATED), agent.toString() + "?");
+        kappaModel.addVariable(agents, agent.toString() + "?", NOT_LOCATED, false);
+        initialiseSim();
+    }
+
+    // Observation interface
     public double getObservation(String key) {
         Observation observation = simulation.getCurrentObservation();
         return(observation.observables.get(key).value);
@@ -220,4 +244,5 @@ public class SpatialKappaSim
     public void setTransitionRate(String name, float rate) {
         simulation.setTransitionRateOrVariable(name, new VariableExpression(rate));
     }
+
 }

@@ -43,6 +43,18 @@ class TestSpatialKappa(unittest.TestCase):
             error = True
         self.assertTrue(error)
 
+    def test_addVariable(self):
+        ca_agent = self.sim.getAgent("ca")
+        self.sim.addVariable(ca_agent)
+        TotCa1 = self.sim.getVariable("TotCa")
+        TotCa2 = self.sim.getVariable("ca(x)?")
+        self.assertEqual(TotCa1, TotCa2)
+        print TotCa1, TotCa2
+        self.sim.runForTime(10.0, False)
+        TotCa1 = self.sim.getVariable("TotCa")
+        TotCa2 = self.sim.getVariable("ca(x)?")
+        self.assertEqual(TotCa1, TotCa2)
+        print TotCa1, TotCa2
 
 if __name__ == '__main__':
     unittest.main()
