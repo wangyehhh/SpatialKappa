@@ -16,10 +16,15 @@ class TestSpatialKappa(unittest.TestCase):
 
     def test_addTransition(self):
         ca_agent = self.sim.getAgent("ca")
-        tran = self.sim.addTransition("TEST", ca_agent, 0.0)
+        tran = self.sim.addTransition("TEST", {}, {"ca": {"x": {}}}, 0.0)
         self.assertEqual(str(tran), "'TEST' : [] -> [[ca(x)]] @ 0.0")
         self.sim.setTransitionRate("TEST", 100.0)
         self.assertEqual(str(tran), "'TEST' : [] -> [[ca(x)]] @ 100.0")
+        tran2 = self.sim.addTransition("TEST2", {}, {"ca": {}}, 66.0)
+        self.assertEqual(str(tran2), "'TEST2' : [] -> [[ca(x)]] @ 66.0")
+        tran3 = self.sim.addTransition("TEST3", {"P": {}}, {}, 77.0)
+        self.assertEqual(str(tran3), "'TEST3' : [[P(x)]] -> [] @ 77.0")
+
 
     def test_addAgent(self):
         obs = self.sim.getObservation("ca")

@@ -195,7 +195,10 @@ public class SpatialKappaSim
     }
 
     // Limited version of addTransition(), just enough to make a creation rule
-    public Transition addTransition(String label, Agent rightSideAgent, float rate) {
+    public Transition addTransition(String label, 
+                                    Map<String,Map<String,Map<String,String>>> leftSideAgents, 
+                                    Map<String,Map<String,Map<String,String>>> rightSideAgents, 
+                                    float rate) {
         List<Transition> transitions = kappaModel.getTransitions();
         for (Transition transition: transitions) {
             if (label.equals(transition.label)) {
@@ -203,9 +206,11 @@ public class SpatialKappaSim
                 throw(new IllegalArgumentException(error));
             }
         }
-        List<Agent> rightSideAgents = new ArrayList();
-        rightSideAgents.add(rightSideAgent);
-        kappaModel.addTransition(label, null, null, null, null, rightSideAgents, new VariableExpression(rate));
+        kappaModel.addTransition(label, 
+                                 null, agentList(leftSideAgents), 
+                                 null, 
+                                 null, agentList(rightSideAgents), 
+                                 new VariableExpression(rate));
         initialiseSim();
 
         // Returning the transition may not be strictly necessary
