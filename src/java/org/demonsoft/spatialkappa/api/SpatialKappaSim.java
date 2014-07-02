@@ -103,34 +103,13 @@ public class SpatialKappaSim
         runUntilTime(stepEndTime, progress);
     }
 
-    // Variables interface
-    public void setVariable(float input, String label) {
-        kappaModel.addVariable(new VariableExpression(input), label);
-        initialiseSim();
-    }
-
-    public double getVariable(String variableName) {
-        Variable variable = kappaModel.getVariables().get(variableName);
-        ObservationElement observable = variable.evaluate(simulation);
-        return(observable.value);
-    }
-
-    public void addVariable(Agent agent, String siteName, String linkName) {
-        List<Agent> agents = new ArrayList<Agent>();
-        agents.add(agent.clone()); 
-        AgentSite agentSite = agents.get(0).getSite(siteName);
-        agentSite.setLinkName(linkName);
-        // kappaModel.addVariable(new VariableExpression(agents, NOT_LOCATED), agent.toString() + "?");
-        kappaModel.addVariable(agents, agent.toString() + "?", NOT_LOCATED, false);
-        initialiseSim();
-    }
-
+    // General function to allow an AgentList to be created programmtically.     
     // This allows a variable to be set using the following syntax in python:
     // {agent_name1: {site_name1: {"l": link_name, "s": state_name}, site_name2: {"l": link_name, "s": state_name}, ...}, agent_name2: {site_name1: {"l": link_name, "s": state_name}, ...}, ...}
     //
     // e.g.:
     // {"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}}
-    public void addVariableMap(Map<String,Map<String,Map<String,String>>> agentsMap, String label) {
+    public List<Agent> agentList(Map<String,Map<String,Map<String,String>>> agentsMap) {
         List<Agent> agents = new ArrayList<Agent>();
         for (Map.Entry<String,Map<String,Map<String,String>>> entry: agentsMap.entrySet()) {
             String agentName = entry.getKey();
@@ -162,6 +141,34 @@ public class SpatialKappaSim
             }
             agents.add(agent);
         }
+        return(agents);
+    }
+
+    // Variables interface
+    public void setVariable(float input, String label) {
+        kappaModel.addVariable(new VariableExpression(input), label);
+        initialiseSim();
+    }
+
+    public double getVariable(String variableName) {
+        Variable variable = kappaModel.getVariables().get(variableName);
+        ObservationElement observable = variable.evaluate(simulation);
+        return(observable.value);
+    }
+
+    public void addVariable(Agent agent, String siteName, String linkName) {
+        List<Agent> agents = new ArrayList<Agent>();
+        agents.add(agent.clone()); 
+        AgentSite agentSite = agents.get(0).getSite(siteName);
+        agentSite.setLinkName(linkName);
+        // kappaModel.addVariable(new VariableExpression(agents, NOT_LOCATED), agent.toString() + "?");
+        kappaModel.addVariable(agents, agent.toString() + "?", NOT_LOCATED, false);
+        initialiseSim();
+    }
+
+    // This allows a variable to be set using the syntax as described in agentList()
+    public void addVariableMap(Map<String,Map<String,Map<String,String>>> agentsMap, String label) {
+        List<Agent> agents = agentList(agentsMap);
         kappaModel.addVariable(agents, label, NOT_LOCATED, false);
         initialiseSim();
     }
