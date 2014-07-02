@@ -65,13 +65,27 @@ public class SpatialKappaSim
         simulation = new TransitionMatchingSimulation(kappaModel);
     }
 
+    
+    // General Accessor methods
+
     // Get the time in user units
     public float getTime() {
         return(simulation.getTime()/(float)timeMult);
     }
 
-    // Run methods
+    // Get an agent
+    public Agent getAgent(String name) {
+        for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
+            for (Agent currentAgent : complex.agents) {
+                if (name.equals(currentAgent.name)) {
+                    return(currentAgent);
+                }
+            }
+        }
+        return (Agent) null;
+    }
 
+    // Run methods
     // stepEndTime is provided in user units
     public void runUntilTime(float stepEndTime, boolean progress) {
         simulation.runByTime2(stepEndTime*(float)timeMult, progress);
@@ -82,20 +96,11 @@ public class SpatialKappaSim
         }
     }
 
+    // test_runForTime
     // dt is provided in user units
     public void runForTime(float dt, boolean progress) {
         float stepEndTime = getTime() + dt;
         runUntilTime(stepEndTime, progress);
-    }
-
-    public Map<String, Variable> getVariables() {
-        Map<String, Variable> variables = kappaModel.getVariables();
-        if (verbose) {
-            for (Map.Entry<String, Variable> variable : variables.entrySet()) {
-                System.out.println("Key = " + variable.getKey() + ", Value = " + variable.getValue());
-            }
-        }
-        return(variables);
     }
 
     // Variables interface
@@ -161,23 +166,56 @@ public class SpatialKappaSim
         initialiseSim();
     }
 
+    public Map<String, Variable> getVariables() {
+        Map<String, Variable> variables = kappaModel.getVariables();
+        if (verbose) {
+            for (Map.Entry<String, Variable> variable : variables.entrySet()) {
+                System.out.println("Key = " + variable.getKey() + ", Value = " + variable.getValue());
+            }
+        }
+        return(variables);
+    }
+
     // Observation interface
     public double getObservation(String key) {
         Observation observation = simulation.getCurrentObservation();
         return(observation.observables.get(key).value);
     }
 
-    public Agent getAgent(String name) {
-        for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
-            for (Agent currentAgent : complex.agents) {
-                if (name.equals(currentAgent.name)) {
-                    return(currentAgent);
-                }
-            }
-        }
-        return (Agent) null;
+    // Transition interface
+    public Transition getTransition(String label) {
+        return simulation.getTransition(label);
     }
 
+    // Limited version of addTransition(), just enough to make a creation rule
+    public Transition addTransition(String label, Agent rightSideAgent, float rate) {
+        List<Transition> transitions = kappaModel.getTransitions();
+        for (Transition transition: transitions) {
+            if (label.equals(transition.label)) {
+                String error = "Transition label \"" + label + "\" already exists";
+                throw(new IllegalArgumentException(error));
+            }
+        }
+        List<Agent> rightSideAgents = new ArrayList();
+        rightSideAgents.add(rightSideAgent);
+        kappaModel.addTransition(label, null, null, null, null, rightSideAgents, new VariableExpression(rate));
+        initialiseSim();
+
+        // Returning the transition may not be strictly necessary
+        transitions = kappaModel.getTransitions();
+        for (Transition transition: transitions) {
+            if (label.equals(transition.label)) {
+                return transition;
+            }
+        }
+        return (Transition) null; 
+    }
+
+    public void setTransitionRate(String name, float rate) {
+        simulation.setTransitionRateOrVariable(name, new VariableExpression(rate));
+    }
+
+    // Agent interface
     // value can be negative
     public void addAgent(String key, int value) {
         List<Agent> agents = new ArrayList<Agent>();
@@ -214,16 +252,17 @@ public class SpatialKappaSim
     public void setAgentInitialValue(String key, double value) {
         setAgentInitialValue(key, (int)value);
     }
-    
+
+    // Printing methods
+    @Override
+    public String toString() {
+        return(kappaModel.toString());
+    }
+
     private void printFixedLocatedInitialValuesMap() {
         for (Map.Entry<Complex, Integer> result : kappaModel.getFixedLocatedInitialValuesMap().entrySet()) {
             System.out.println("Key = " + result.getKey() + ", Value = " + result.getValue());
         }
-    }
-
-    @Override
-    public String toString() {
-        return(kappaModel.toString());
     }
 
     public void printAgentNames() {
@@ -255,36 +294,5 @@ public class SpatialKappaSim
         return interactions.toString();
     }
 
-    public Transition getTransition(String label) {
-        return simulation.getTransition(label);
-    }
-
-    // Limited version of addTransition(), just enough to make a creation rule
-    public Transition addTransition(String label, Agent rightSideAgent, float rate) {
-        List<Transition> transitions = kappaModel.getTransitions();
-        for (Transition transition: transitions) {
-            if (label.equals(transition.label)) {
-                String error = "Transition label \"" + label + "\" already exists";
-                throw(new IllegalArgumentException(error));
-            }
-        }
-        List<Agent> rightSideAgents = new ArrayList();
-        rightSideAgents.add(rightSideAgent);
-        kappaModel.addTransition(label, null, null, null, null, rightSideAgents, new VariableExpression(rate));
-        initialiseSim();
-
-        // Returning the transition may not be strictly necessary
-        transitions = kappaModel.getTransitions();
-        for (Transition transition: transitions) {
-            if (label.equals(transition.label)) {
-                return transition;
-            }
-        }
-        return (Transition) null; 
-    }
-
-    public void setTransitionRate(String name, float rate) {
-        simulation.setTransitionRateOrVariable(name, new VariableExpression(rate));
-    }
 
 }
