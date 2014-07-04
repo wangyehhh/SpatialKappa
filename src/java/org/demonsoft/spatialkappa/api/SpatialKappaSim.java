@@ -85,6 +85,29 @@ public class SpatialKappaSim
         return (Agent) null;
     }
 
+    private Map<String,Map<String,Map<String,String>>> getAgentMap(Agent agent) {
+        Map<String,Map<String,Map<String,String>>> agentMap  = new HashMap<String,Map<String,Map<String,String>>>();
+        Map<String,Map<String,String>> siteMap  = new HashMap<String,Map<String,String>>();
+        Collection<AgentSite> sites = agent.getSites();
+        for (AgentSite site : sites) {
+            Map<String,String> siteLinkState = new HashMap<String,String>();
+            if (site.getLinkName() != null) {
+                siteLinkState.put("l", site.getLinkName());
+            }
+            if (site.getState() != null) {
+                siteLinkState.put("s", site.getState());
+            }
+            siteMap.put(site.name, siteLinkState);
+        }
+        agentMap.put(agent.name, siteMap);
+        return(agentMap);
+    }
+
+    public Map<String,Map<String,Map<String,String>>> getAgentMap(String agentName) {
+        return(getAgentMap(getAgent(agentName)));
+    }
+
+
     // Run methods
     // stepEndTime is provided in user units
     public void runUntilTime(float stepEndTime, boolean progress) {

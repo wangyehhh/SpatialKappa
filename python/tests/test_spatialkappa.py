@@ -88,5 +88,14 @@ class TestSpatialKappa(unittest.TestCase):
         self.assertEqual(PCa1, PCa2)
         print PCa1, PCa2
 
+    def test_getAgentMap(self):
+        agent_map = self.sim.getAgentMap("ca")
+        self.assertEqual(agent_map.keys(), [u'ca'])
+        self.assertEqual(agent_map[u'ca'].keys(), [u'x'])
+        self.assertEqual(len(agent_map[u'ca'][u'x']), 0)
+
+    def tearDown(self):
+        self.sim = []
+        
 if __name__ == '__main__':
     unittest.main()
