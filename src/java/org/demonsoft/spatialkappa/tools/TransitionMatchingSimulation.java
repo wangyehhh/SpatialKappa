@@ -5,6 +5,7 @@ import static org.demonsoft.spatialkappa.model.Utils.getChannel;
 import static org.demonsoft.spatialkappa.model.Utils.getCompartment;
 import static org.demonsoft.spatialkappa.model.Utils.getComplexes;
 import static org.demonsoft.spatialkappa.model.Utils.getList;
+import org.demonsoft.spatialkappa.model.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -398,7 +399,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         if (verbose) {
             System.out.println("getTimeDelta: totalQuantity = " + totalQuantity);
         }
-        return (float) -Math.log(Math.random()) / totalQuantity;
+        return (float) -Math.log(Utils.random()) / totalQuantity;
     }
 
     private Transition pickFiniteRateTransition() {
@@ -410,7 +411,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
             totalQuantity += entry.getValue();
         }
         Transition lastTransition = null;
-        float item = (float) (totalQuantity * Math.random());
+        float item = (float) (totalQuantity * Utils.random());
         for (Map.Entry<Transition, Float> entry : finiteRateTransitionActivityMap.entrySet()) {
             if (entry.getValue() > 0) {
                 lastTransition = entry.getKey();
@@ -435,7 +436,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                 totalCount++;
             }
         }
-        float item = (float) (totalCount * Math.random());
+        float item = (float) (totalCount * Utils.random());
         for (Map.Entry<Transition, Boolean> entry : infiniteRateTransitionActivityMap.entrySet()) {
             if (entry.getValue() && item <= 1) {
                 return entry.getKey();
@@ -888,7 +889,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         }
 
         TransitionInstance lastInstance = null;
-        float randomValue = (float) (totalTransitionRate * Math.random());
+        float randomValue = (float) (totalTransitionRate * Utils.random());
         for (TransitionInstance transitionInstance : transitionInstances) {
             float rate = infiniteRate ? transitionInstance.activity : transitionInstance.totalRate;
             if (rate > 0) {
