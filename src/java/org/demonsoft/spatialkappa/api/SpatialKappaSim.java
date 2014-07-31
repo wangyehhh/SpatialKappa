@@ -190,7 +190,7 @@ public class SpatialKappaSim
     }
 
     // This allows a variable to be set using the syntax as described in agentList()
-    public void addVariableMap(Map<String,Map<String,Map<String,String>>> agentsMap, String label) {
+    public void addVariableMap(String label, Map<String,Map<String,Map<String,String>>> agentsMap) {
         List<Agent> agents = agentList(agentsMap);
         kappaModel.addVariable(agents, label, NOT_LOCATED, false);
         initialiseSim();

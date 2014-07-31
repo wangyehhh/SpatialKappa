@@ -65,7 +65,7 @@ class TestSpatialKappa(unittest.TestCase):
         ## Create an error due to nonexistent site name
         error = False
         try:
-            self.sim.addVariableMap({"ca": {"nonexistent_site_name": {"l": "?"}}}, 'test')
+            self.sim.addVariableMap("test", {"ca": {"nonexistent_site_name": {"l": "?"}}})
         except Py4JJavaError:
             error = True
         self.assertTrue(error)
@@ -73,16 +73,16 @@ class TestSpatialKappa(unittest.TestCase):
         ## Create an error due to nonexistent site attribute
         error = False
         try:
-            self.sim.addVariableMap({"ca": {"x": {"nonexistent_site_attribute": "?"}}}, 'test')
+            self.sim.addVariableMap("test", {"ca": {"x": {"nonexistent_site_attribute": "?"}}})
         except Py4JJavaError:
             error = True
         self.assertTrue(error)
 
-        self.sim.addVariableMap({"ca": {"x": {"l": "?"}}}, 'TotCa2')
+        self.sim.addVariableMap('TotCa2', {"ca": {"x": {"l": "?"}}})
         TotCa1 = self.sim.getVariable("TotCa")
         TotCa2 = self.sim.getVariable("TotCa2")
         self.assertEqual(TotCa1, TotCa2)
-        self.sim.addVariableMap({"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}}, 'P-Ca2')
+        self.sim.addVariableMap('P-Ca2', {"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}})
         PCa1 = self.sim.getVariable("P-Ca")
         PCa2 = self.sim.getVariable("P-Ca2")
         self.assertEqual(PCa1, PCa2)
