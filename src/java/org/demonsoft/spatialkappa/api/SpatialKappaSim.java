@@ -329,5 +329,7 @@ public class SpatialKappaSim
         return interactions.toString();
     }
 
-
+    public void setSeed(long seed) {
+        Utils.setSeed(seed);
+    }
 }
