@@ -41,7 +41,7 @@ public class SpatialKappaSim
     // Constructors
     public SpatialKappaSim(String timeUnits, boolean verbose) {
         this.verbose = verbose;
-        Map<String, Double> allowedTimeUnits = new <String, Double>HashMap();
+        Map<String, Double> allowedTimeUnits = new HashMap<String, Double>();
         allowedTimeUnits.put("s" , new Double(1E-3));
         allowedTimeUnits.put("ms", new Double(1.0));
         if (!allowedTimeUnits.containsKey(timeUnits)) {
