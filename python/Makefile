@@ -1,0 +1,11 @@
+PREFIX=/usr/local
+
+build_py:
+	python2.7 setup.py build
+
+test: build_py
+	python2.7 -m unittest tests
+
+install:
+	python2.7 setup.py install --prefix=$(PREFIX)
+

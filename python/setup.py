@@ -21,5 +21,6 @@ setup(name='SpatialKappa',
       package_dir={'SpatialKappa': 'SpatialKappa'},
       package_data={'SpatialKappa': ['share/SpatialKappa/*']})
 
-os.unlink(os.path.join(SHARE_DIR, ANTLRJAR_FILE))
-os.unlink(os.path.join(SHARE_DIR, SKJAR_FILE))
+# Don't clean up, so that jaf files are in place for tests
+# os.unlink(os.path.join(SHARE_DIR, ANTLRJAR_FILE))
+# os.unlink(os.path.join(SHARE_DIR, SKJAR_FILE))
