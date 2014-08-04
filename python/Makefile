@@ -1,6 +1,7 @@
 PREFIX=/usr/local
 
 build_py:
+	cd .. ; make
 	python2.7 setup.py build
 
 test: build_py
