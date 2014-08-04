@@ -8,7 +8,7 @@ class TestSpatialKappa(unittest.TestCase):
     def setUp(self):
         self.sk = SpatialKappa.SpatialKappa()
         self.sim = self.sk.kappa_sim("ms", True)
-        self.sim.loadFile("caPump.ka")
+        self.sim.loadFile(self.__module__ + "/caPump.ka")
 
     def test_runForTime(self):
         self.sim.runForTime(100.0, False)
