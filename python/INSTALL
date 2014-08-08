@@ -9,6 +9,9 @@
    
    easy_install-2.7  --install-dir=${HOME}/lib/python2.7/site-packages/ py4j
 
+   An alternative is to use pip
+   pip-python install py4j  --upgrade  -t /disk/scratch/sterratt/lib/python2.7/site-packages/ 
+
 2. Install SpatialKappa python files
    
    sudo python2.7 setup.py install
