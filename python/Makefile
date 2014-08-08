@@ -7,6 +7,6 @@ build_py:
 test: build_py
 	python2.7 -m unittest tests
 
-install:
+install: build_py
 	python2.7 setup.py install --prefix=$(PREFIX)
 
