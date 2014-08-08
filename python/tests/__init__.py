@@ -10,6 +10,9 @@ class TestSpatialKappa(unittest.TestCase):
         self.sim = self.sk.kappa_sim("ms", True)
         self.sim.loadFile(self.__module__ + "/caPump.ka")
 
+    def test_createSpatialKappa(self):
+        self.sk = SpatialKappa.SpatialKappa()
+
     def test_runForTime(self):
         self.sim.runForTime(100.0, False)
         self.assertEqual(self.sim.getTime(), 100.0)
@@ -93,6 +96,17 @@ class TestSpatialKappa(unittest.TestCase):
         self.assertEqual(agent_map.keys(), [u'ca'])
         self.assertEqual(agent_map[u'ca'].keys(), [u'x'])
         self.assertEqual(len(agent_map[u'ca'][u'x']), 0)
+
+    # Test exception thrown with faulty Kappa file
+    def test_noInit(self):
+        self.sk = SpatialKappa.SpatialKappa()
+        self.sim = self.sk.kappa_sim("ms", True)
+        self.sim.loadFile(self.__module__ + "/no_init.ka")
+        try:
+            self.sim.getAgent('ca')
+        except Py4JJavaError:
+            error = True
+        self.assertTrue(error)
 
     def tearDown(self):
         self.sim = []

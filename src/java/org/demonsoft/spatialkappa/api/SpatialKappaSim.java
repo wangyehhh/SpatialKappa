@@ -35,6 +35,7 @@ public class SpatialKappaSim
 {
     private IKappaModel kappaModel;
     private TransitionMatchingSimulation simulation;
+    private File kappaFile;
     private boolean verbose;
     public double timeMult;
 
@@ -55,9 +56,9 @@ public class SpatialKappaSim
         this("ms", false);
     }
 
-    public void loadFile(String kappaFile) throws Exception {
-        File f = new File(kappaFile);
-        kappaModel = Utils.createKappaModel(f);
+    public void loadFile(String kappaFileName) throws Exception {
+        kappaFile = new File(kappaFileName);
+        kappaModel = Utils.createKappaModel(kappaFile);
         initialiseSim();
     }
 
@@ -82,7 +83,8 @@ public class SpatialKappaSim
                 }
             }
         }
-        return (Agent) null;
+        String error = "Agent " + name + " not defined in " + this.kappaFile + "\nMake sure there are both %agent: and %init: declarations.";
+        throw(new IllegalArgumentException(error));
     }
 
     private Map<String,Map<String,Map<String,String>>> getAgentMap(Agent agent) {
@@ -256,11 +258,9 @@ public class SpatialKappaSim
         List<Agent> agents = new ArrayList<Agent>();
         SimulationState state = (SimulationState) simulation;                
         Agent agent = getAgent(key);
-        if (agent != null) {
-            agents.add(agent);
-            state.addComplexInstances(agents, value);
-            agents.clear();
-        }
+        agents.add(agent);
+        state.addComplexInstances(agents, value);
+        agents.clear();     
     }
 
     public void addAgent(String key, double value) {
