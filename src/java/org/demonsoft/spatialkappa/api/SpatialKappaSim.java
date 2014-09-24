@@ -87,6 +87,16 @@ public class SpatialKappaSim
         throw(new IllegalArgumentException(error));
     }
 
+    // Test if an agent exists
+    public boolean isAgent(String name) {
+        try {
+            Agent agent = getAgent(name);
+        } catch(Exception e) {
+            return(false);
+        }
+        return(true);
+    }
+
     private Map<String,Map<String,Map<String,String>>> getAgentMap(Agent agent) {
         Map<String,Map<String,Map<String,String>>> agentMap  = new HashMap<String,Map<String,Map<String,String>>>();
         Map<String,Map<String,String>> siteMap  = new HashMap<String,Map<String,String>>();
