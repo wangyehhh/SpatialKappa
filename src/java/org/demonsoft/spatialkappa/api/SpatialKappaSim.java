@@ -291,7 +291,7 @@ public class SpatialKappaSim
             agents.clear();
         }
         initialiseSim();
-        if (verbose) { System.out.println("Number of " + key + " is " +  getObservation(key)); }
+        if (verbose) { System.out.println("Number of " + key + " is " +  getVariable(key)); }
     }
 
     public void setAgentInitialValue(String key, double value) {
