@@ -4,7 +4,10 @@ SpatialKappa
 <p style="text-align: center;">14 September 2012</p>
 
 <p style="text-align: center;">Copyright &copy; 2012 DemonSoft.org
-&lt;<a href="http://www.demonsoft.org/">http://www.demonsoft.org/</a>&gt;</p>
+&lt;<a
+href="http://www.demonsoft.org/">http://www.demonsoft.org/</a>&gt;<br/>
+Copyright &copy; 2014 David C Sterratt <david.c.sterratt@ed.ac.uk>
+</p>
 
 <h4>INTRODUCTION</h4>
 
@@ -12,6 +15,15 @@ SpatialKappa
 of Kappa to allow expression of location and transport in models. A user manual is available [here][manual-link].</p>
 
 Feel free to add bug reports or feature requests [here][bug-link].</p>
+
+<h4>COMPILATION AND INSTALLATION</h4>
+
+To make the `SpatialKappa.jar` file either:
+1. Import this code as an Ecclipse project
+2. Run `make all`
+
+To install the python interface, cd into the python directory, and
+follow the instructions in [python/INSTALL.md][1]
 
 <h4>LICENSE</h4>
 
@@ -99,4 +111,4 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
 
 [bug-link]: https://github.com/lptolik/SpatialKappa/issues
 [manual-link]: https://github.com/lptolik/SpatialKappa/raw/master/docs/manual/SpatialKappaManual-v2.1.0.pdf
-
+[1]: python/INSTALL.md
