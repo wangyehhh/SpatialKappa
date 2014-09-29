@@ -1,25 +1,37 @@
-0. Make sure that the SpatialKappa jar file has been built, either
-   using Eclipse, or using the Makefile in the directory above.
+Installing the Python interface to SpatialKappa
+===============================================
 
-1. Install py4j, either (a) in standard system location:
+0. Build the SpatialKappa jar as described in <../README.md>
+
+1. Install py4j with python 2.7 from source:
+
+        git clone https://github.com/davidcsterratt/py4j
+        cd py4j
+        cd py4j-java
+        ant jar
+        cd ../py4j/py4j-python
+        sudo python2.7 setup.py install
+
+    In the long term, it should be possible to install using `pip`:
+
+        sudo apt-get install pip-python 
+        sudo pip install py4j --upgrade
+
+    To install in a non-standard location, use the `-t` flag, e.g.:
    
-   sudo easy_install-2.7 py4j
-
-   or (b) in a user directory, e.g.:
-   
-   easy_install-2.7  --install-dir=${HOME}/lib/python2.7/site-packages/ py4j
-
-   An alternative is to use pip
-   pip-python install py4j  --upgrade  -t /disk/scratch/sterratt/lib/python2.7/site-packages/ 
+        pip install py4j --upgrade -t ${HOME}/lib/python2.7/site-packages/
 
 2. Install SpatialKappa python files
    
-   sudo python2.7 setup.py install
-   # python2.7 setup.py install --prefix=${HOME}
+        sudo python2.7 setup.py install
+
+    An alternative prefix can be specified like this:
+
+        python2.7 setup.py install --prefix=${HOME}
 
 3. Run the test:
 
-   cd test/launch-SpatialKappa
-   python2.7 launch-SpatialKappa.py
+        cd test/launch-SpatialKappa
+        python2.7 launch-SpatialKappa.py
    
    This gives an indication of what methods are exposed to python.
