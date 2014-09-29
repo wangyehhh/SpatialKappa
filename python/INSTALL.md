@@ -1,7 +1,7 @@
 Installing the Python interface to SpatialKappa
 ===============================================
 
-0. Build the SpatialKappa jar as described in <../README.md>
+0. Build the SpatialKappa jar as described in [../README.md][1]
 
 1. Install py4j with python 2.7 from source:
 
@@ -35,3 +35,5 @@ Installing the Python interface to SpatialKappa
         python2.7 launch-SpatialKappa.py
    
    This gives an indication of what methods are exposed to python.
+
+[1]: ../README.md
