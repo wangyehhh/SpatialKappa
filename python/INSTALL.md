@@ -32,10 +32,9 @@ Installing the Python interface to SpatialKappa
 
         python2.7 setup.py install --prefix=${HOME}
 
-3. Run the test:
+3. Run the tests:
 
-        cd tests/launch-SpatialKappa
-        python2.7 launch-SpatialKappa.py
+        python2.7 -m unittest test
    
    This gives an indication of what methods are exposed to python.
 
