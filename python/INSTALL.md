@@ -34,7 +34,7 @@ Installing the Python interface to SpatialKappa
 
 3. Run the test:
 
-        cd test/launch-SpatialKappa
+        cd tests/launch-SpatialKappa
         python2.7 launch-SpatialKappa.py
    
    This gives an indication of what methods are exposed to python.
