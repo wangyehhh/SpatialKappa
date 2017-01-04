@@ -24,7 +24,7 @@ To make the `SpatialKappa.jar` file either:
 2. Run `make all`
 
 To install the python interface, cd into the python directory, and
-follow the instructions in [python/INSTALL.md]
+follow the instructions in [python/INSTALL.md](python/INSTALL.md)
 
 <h4>LICENSE</h4>
 
