@@ -19,11 +19,12 @@ Feel free to add bug reports or feature requests [here][bug-link].</p>
 <h4>COMPILATION AND INSTALLATION</h4>
 
 To make the `SpatialKappa.jar` file either:
-1. Import this code as an Ecclipse project
+
+1. Import this code as an Ecclipse project; or
 2. Run `make all`
 
 To install the python interface, cd into the python directory, and
-follow the instructions in [python/INSTALL.md][1]
+follow the instructions in [python/INSTALL.md]
 
 <h4>LICENSE</h4>
 
