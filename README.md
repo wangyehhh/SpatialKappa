@@ -21,7 +21,7 @@ Feel free to add bug reports or feature requests [here][bug-link].</p>
 To make the `SpatialKappa.jar` file either:
 
 1. Import this code as an Ecclipse project; or
-2. Run `make all`
+2. Install ant (`sudo apt install ant openjdk-7-jdk` on Debian/Ubuntu) and run `make all`
 
 To install the python interface, cd into the python directory, and
 follow the instructions in [python/INSTALL.md](python/INSTALL.md)
