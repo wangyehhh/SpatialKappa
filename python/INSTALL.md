@@ -7,7 +7,7 @@ Installing the Python interface to SpatialKappa
    
    a. Install py4j using `pip`:
 
-        sudo apt-get install pip-python 
+        sudo apt-get install python-pip 
         sudo pip install py4j --upgrade
 
       To install in a non-standard location, use the `-t` flag, e.g.:
