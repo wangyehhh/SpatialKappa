@@ -1,3 +1,5 @@
+name = "SpatialKappa"
+
 import py4j.java_gateway as jg
 import os
 

@@ -8,7 +8,7 @@ class TestSpatialKappa(unittest.TestCase):
     def setUp(self):
         self.sk = SpatialKappa.SpatialKappa()
         self.sim = self.sk.kappa_sim("ms", True)
-        self.sim.loadFile(self.__module__ + "/caPump.ka")
+        self.sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
 
     def test_createSpatialKappa(self):
         self.sk = SpatialKappa.SpatialKappa()
@@ -101,7 +101,7 @@ class TestSpatialKappa(unittest.TestCase):
     def test_noInit(self):
         self.sk = SpatialKappa.SpatialKappa()
         self.sim = self.sk.kappa_sim("ms", True)
-        self.sim.loadFile(self.__module__ + "/no_init.ka")
+        self.sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/no_init.ka")
         try:
             self.sim.getAgent('ca')
         except Py4JJavaError:
