@@ -9,14 +9,16 @@ href="http://www.demonsoft.org/">http://www.demonsoft.org/</a>&gt;<br/>
 Copyright &copy; 2014 David C Sterratt <david.c.sterratt@ed.ac.uk>
 </p>
 
-<h4>INTRODUCTION</h4>
+INTRODUCTION
+------------
 
-<p>This project contains an implementation of a syntactic extension
-of Kappa to allow expression of location and transport in models. A user manual is available [here][manual-link].</p>
+This project contains an implementation of a syntactic extension
+of Kappa to allow expression of location and transport in models. A user manual is available [here][manual-link].
 
-Feel free to add bug reports or feature requests [here][bug-link].</p>
+Feel free to add bug reports or feature requests [here][bug-link].
 
-<h4>COMPILATION AND INSTALLATION</h4>
+COMPILATION AND INSTALLATION
+----------------------------
 
 To make the `SpatialKappa.jar` file either:
 
@@ -26,13 +28,14 @@ To make the `SpatialKappa.jar` file either:
 To install the python interface, cd into the python directory, and
 follow the instructions in [python/INSTALL.md](python/INSTALL.md)
 
-<h4>LICENSE</h4>
+LICENSE
+-------
 
-<p>This project is licenced under the GNU Lesser General Public
-Licence Version 3 (LGPLv3), included as &lt;<a href="LICENSE.html">LICENSE.html</a>&gt;.
+This project is licenced under the GNU Lesser General Public
+Licence Version 3 (LGPLv3), included as [LICENSE.html](LICENSE.html).
 
 Included third party libraries are released under their respective
-licences, listed below:</p>
+licences, listed below:
 
 <table style="border: groove;">
 	<tr>
@@ -89,26 +92,17 @@ licences, listed below:</p>
 </table>
 
 
-<h4>ACKNOWLEDGEMENTS</h4>
+ACKNOWLEDGEMENTS
+----------------
 
-The development of Spatial Kappa was funded in part by <a href="http://www.csbe.ed.ac.uk/">SynthSys</a>. SynthSys is a Centre for 
-Integrative Systems Biology (CISB) funded by BBSRC and EPSRC, reference BB/D019621/1.
+The development of Spatial Kappa was funded in part by <a href="http://www.csbe.ed.ac.uk/">SynthSys</a>. SynthSys is a Centre for Integrative Systems Biology (CISB) funded by BBSRC and EPSRC, reference BB/D019621/1.
 
 
-<h4>DISCLAIMER</h4>
+DISCLAIMER
+----------	
 
-<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
-BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
-
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [bug-link]: https://github.com/lptolik/SpatialKappa/issues
 [manual-link]: https://github.com/lptolik/SpatialKappa/raw/master/docs/manual/SpatialKappaManual-v2.1.0.pdf
