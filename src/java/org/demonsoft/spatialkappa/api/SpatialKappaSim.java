@@ -40,7 +40,10 @@ public class SpatialKappaSim
     public double timeMult;
 
     // Constructors
-    public SpatialKappaSim(String timeUnits, boolean verbose) {
+    public SpatialKappaSim(String timeUnits, boolean verbose, Long seed) {
+        if (seed != null) {
+            Utils.setSeed(seed.longValue());
+        }
         this.verbose = verbose;
         Map<String, Double> allowedTimeUnits = new HashMap<String, Double>();
         allowedTimeUnits.put("s" , new Double(1E-3));
@@ -52,6 +55,10 @@ public class SpatialKappaSim
         this.timeMult = (double)allowedTimeUnits.get(timeUnits);
     }
 
+    public SpatialKappaSim(String timeUnits, boolean verbose) {
+        this(timeUnits, verbose, null);
+    }
+    
     public SpatialKappaSim() {
         this("ms", false);
     }
@@ -339,7 +346,8 @@ public class SpatialKappaSim
         return interactions.toString();
     }
 
-    public void setSeed(long seed) {
-        Utils.setSeed(seed);
+    public void setSeed(long seed) throws Exception {
+        String error = "setSeed() is deprecated. Instead call SpatialKappaSim(String timeUnits, boolean verbose, Long seed) with the seed argument" ;
+        throw(new Exception(error));
     }
 }

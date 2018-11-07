@@ -25,8 +25,8 @@ class SpatialKappa:
         self.gateway_client = jg.GatewayClient(port=self.port)
         self.gateway = jg.JavaGateway(self.gateway_client, auto_convert=True)
 
-    def kappa_sim(self, time_units, verbose):
-        ks = self.gateway.jvm.org.demonsoft.spatialkappa.api.SpatialKappaSim(time_units, verbose)
+    def kappa_sim(self, time_units, verbose, seed=None):
+        ks = self.gateway.jvm.org.demonsoft.spatialkappa.api.SpatialKappaSim(time_units, verbose, seed)
         return ks
 
     def __del__(self):

@@ -6,10 +6,45 @@ from py4j.protocol import *
 class TestSpatialKappa(unittest.TestCase):
     
     def setUp(self):
-        self.sk = SpatialKappa.SpatialKappa()
+        self.flog = open("/tmp/SpatialKappa-test.log", "w")
+        self.sk = SpatialKappa.SpatialKappa(redirect_stdout=self.flog)
         self.sim = self.sk.kappa_sim("ms", True)
         self.sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
 
+    def test_setSeed(self):
+        flog1 = open("/tmp/SpatialKappa-seed-1.log", "w")
+        sk = SpatialKappa.SpatialKappa(redirect_stdout=flog1)
+        sim1 = sk.kappa_sim("ms", True, 1)
+        sim1.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
+        sim1.runForTime(5.0, True)
+
+        flog2 = open("/tmp/SpatialKappa-seed-2.log", "w")
+        sk2 = SpatialKappa.SpatialKappa(redirect_stdout=flog2)
+        sim2 = sk.kappa_sim("ms", True, 1)
+        sim2.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
+        sim2.runForTime(5.0, True)
+
+        self.assertEqual(sim1.getVariable('ca'), sim2.getVariable('ca'))
+        self.assertEqual(sim1.getVariable('P-Ca'), sim2.getVariable('P-Ca'))
+        self.assertEqual(sim1.getVariable('P'), sim2.getVariable('P'))        
+
+        sim1 = []
+        sk1 = []
+        sim2 = []
+        sk2 = []
+
+        flog3 = open("/tmp/SpatialKappa-seed-3.log", "w")
+        sk = SpatialKappa.SpatialKappa(redirect_stdout=flog3)
+        sim = sk.kappa_sim("ms", True)
+        sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
+        sim.runForTime(5.0, True)
+        sim = []
+        sk = []
+
+        flog1.close()
+        flog2.close()
+        flog3.close()
+        
     def test_createSpatialKappa(self):
         self.sk = SpatialKappa.SpatialKappa()
 
@@ -57,12 +92,12 @@ class TestSpatialKappa(unittest.TestCase):
         TotCa1 = self.sim.getVariable("TotCa")
         TotCa2 = self.sim.getVariable("ca(x)?")
         self.assertEqual(TotCa1, TotCa2)
-        print TotCa1, TotCa2
+        ## print TotCa1, TotCa2
         self.sim.runForTime(10.0, False)
         TotCa1 = self.sim.getVariable("TotCa")
         TotCa2 = self.sim.getVariable("ca(x)?")
         self.assertEqual(TotCa1, TotCa2)
-        print TotCa1, TotCa2
+        ## print TotCa1, TotCa2
 
     def test_addVariableMap(self):
         ## Create an error due to nonexistent site name
@@ -89,7 +124,7 @@ class TestSpatialKappa(unittest.TestCase):
         PCa1 = self.sim.getVariable("P-Ca")
         PCa2 = self.sim.getVariable("P-Ca2")
         self.assertEqual(PCa1, PCa2)
-        print PCa1, PCa2
+        ## print PCa1, PCa2
 
     def test_getAgentMap(self):
         agent_map = self.sim.getAgentMap("ca")
@@ -110,6 +145,8 @@ class TestSpatialKappa(unittest.TestCase):
 
     def tearDown(self):
         self.sim = []
+        self.sk = []
+        self.flog.close()
         
 if __name__ == '__main__':
     unittest.main()
