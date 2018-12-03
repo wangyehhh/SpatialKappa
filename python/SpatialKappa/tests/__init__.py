@@ -56,7 +56,7 @@ class TestSpatialKappa(unittest.TestCase):
         ca_agent = self.sim.getAgent("ca")
         tran = self.sim.addTransition("TEST", {}, {"ca": {"x": {}}}, 0.0)
         self.assertEqual(str(tran), "'TEST' : [] -> [[ca(x)]] @ 0.0")
-        self.sim.setTransitionRate("TEST", 100.0)
+        self.sim.setTransitionRateOrVariable("TEST", 100.0)
         self.assertEqual(str(tran), "'TEST' : [] -> [[ca(x)]] @ 100.0")
         tran2 = self.sim.addTransition("TEST2", {}, {"ca": {}}, 66.0)
         self.assertEqual(str(tran2), "'TEST2' : [] -> [[ca(x)]] @ 66.0")
@@ -87,23 +87,11 @@ class TestSpatialKappa(unittest.TestCase):
         self.assertTrue(error)
 
     def test_addVariable(self):
-        ca_agent = self.sim.getAgent("ca")
-        self.sim.addVariable(ca_agent,  "x", "?")
-        TotCa1 = self.sim.getVariable("TotCa")
-        TotCa2 = self.sim.getVariable("ca(x)?")
-        self.assertEqual(TotCa1, TotCa2)
-        ## print TotCa1, TotCa2
-        self.sim.runForTime(10.0, False)
-        TotCa1 = self.sim.getVariable("TotCa")
-        TotCa2 = self.sim.getVariable("ca(x)?")
-        self.assertEqual(TotCa1, TotCa2)
-        ## print TotCa1, TotCa2
-
-    def test_addVariableMap(self):
+        ## 1. Add agent expression
         ## Create an error due to nonexistent site name
         error = False
         try:
-            self.sim.addVariableMap("test", {"ca": {"nonexistent_site_name": {"l": "?"}}})
+            self.sim.addVariable("test", {"ca": {"nonexistent_site_name": {"l": "?"}}})
         except Py4JJavaError:
             error = True
         self.assertTrue(error)
@@ -111,20 +99,24 @@ class TestSpatialKappa(unittest.TestCase):
         ## Create an error due to nonexistent site attribute
         error = False
         try:
-            self.sim.addVariableMap("test", {"ca": {"x": {"nonexistent_site_attribute": "?"}}})
+            self.sim.addVariable("test", {"ca": {"x": {"nonexistent_site_attribute": "?"}}})
         except Py4JJavaError:
             error = True
         self.assertTrue(error)
 
-        self.sim.addVariableMap('TotCa2', {"ca": {"x": {"l": "?"}}})
+        self.sim.addVariable('TotCa2', {"ca": {"x": {"l": "?"}}})
         TotCa1 = self.sim.getVariable("TotCa")
         TotCa2 = self.sim.getVariable("TotCa2")
         self.assertEqual(TotCa1, TotCa2)
-        self.sim.addVariableMap('P-Ca2', {"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}})
+        self.sim.addVariable('P-Ca2', {"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}})
         PCa1 = self.sim.getVariable("P-Ca")
         PCa2 = self.sim.getVariable("P-Ca2")
         self.assertEqual(PCa1, PCa2)
+
         ## print PCa1, PCa2
+
+        ## 2. Add float variable
+        self.sim.addVariable("V", 9.0)
 
     def test_getAgentMap(self):
         agent_map = self.sim.getAgentMap("ca")

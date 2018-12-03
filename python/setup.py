@@ -1,7 +1,7 @@
 import setuptools
 
-VERSION = '2.1.1'
-POSTVERSION = '.post4'
+VERSION = '2.1.2'
+POSTVERSION = ''
 
 with open("README.md", "r") as fh:
     long_description = fh.read()

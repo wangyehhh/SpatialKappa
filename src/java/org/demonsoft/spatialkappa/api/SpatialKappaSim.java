@@ -187,8 +187,15 @@ public class SpatialKappaSim
     }
 
     // Variables interface
-    public void setVariable(float input, String label) {
+    public void addVariable(String label, float input) {
         kappaModel.addVariable(new VariableExpression(input), label);
+        initialiseSim();
+    }
+
+    // This allows a variable to be set using the syntax as described in agentList()
+    public void addVariable(String label, Map<String,Map<String,Map<String,String>>> agentsMap) {
+        List<Agent> agents = agentList(agentsMap);
+        kappaModel.addVariable(agents, label, NOT_LOCATED, false);
         initialiseSim();
     }
 
@@ -197,24 +204,7 @@ public class SpatialKappaSim
         ObservationElement observable = variable.evaluate(simulation);
         return(observable.value);
     }
-
-    public void addVariable(Agent agent, String siteName, String linkName) {
-        List<Agent> agents = new ArrayList<Agent>();
-        agents.add(agent.clone()); 
-        AgentSite agentSite = agents.get(0).getSite(siteName);
-        agentSite.setLinkName(linkName);
-        // kappaModel.addVariable(new VariableExpression(agents, NOT_LOCATED), agent.toString() + "?");
-        kappaModel.addVariable(agents, agent.toString() + "?", NOT_LOCATED, false);
-        initialiseSim();
-    }
-
-    // This allows a variable to be set using the syntax as described in agentList()
-    public void addVariableMap(String label, Map<String,Map<String,Map<String,String>>> agentsMap) {
-        List<Agent> agents = agentList(agentsMap);
-        kappaModel.addVariable(agents, label, NOT_LOCATED, false);
-        initialiseSim();
-    }
-
+    
     public Map<String, Variable> getVariables() {
         Map<String, Variable> variables = kappaModel.getVariables();
         if (verbose) {
@@ -265,15 +255,15 @@ public class SpatialKappaSim
         return (Transition) null; 
     }
 
-    public void setTransitionRate(String name, float rate) {
-        simulation.setTransitionRateOrVariable(name, new VariableExpression(rate));
+    public void setTransitionRateOrVariable(String label, float rate) {
+        simulation.setTransitionRateOrVariable(label, new VariableExpression(rate));
     }
 
     // Agent interface
     // value can be negative
     public void addAgent(String key, int value) {
         List<Agent> agents = new ArrayList<Agent>();
-        SimulationState state = (SimulationState) simulation;                
+        SimulationState state = (SimulationState) simulation;               
         Agent agent = getAgent(key);
         agents.add(agent);
         state.addComplexInstances(agents, value);

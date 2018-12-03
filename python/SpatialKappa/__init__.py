@@ -99,29 +99,28 @@ class SpatialKappa:
           initial "value" of agent "key" in its default configuration,
           type-safe for double
 
-        * setVariable(float input, String label) -- Set variable
-          "label" to float value "input"
+        * addVariable(String label, dict agentsMap) -- Create a
+          variable "label" using the syntax as described in agentList()
 
-        * getVariable(String variableName) -- Get value of
-          "variableName"
+        * addVariable(String label, float input) -- Create a
+          variable "label" with value "input"
 
-        * addVariableMap(String label, dict agentsMap) -- Set a
-          variable using the syntax as described in agentList()
+        * getVariable(String label) -- Get value of "label"
 
         * getVariables() -- Return variables. If "kappa_sim.verbose"
           is True, print values
         
         * getObservation(String key) -- get Observation "key"
         
-        * getTransition(String label) -- Get transition labeled "label"
-        
         * addTransition(String label, dict leftSideAgents, dict rightSideAgents, float rate) -- 
           Create unidirectional transition labelled "label" with
           "leftSideAgents" and "rightSideAgents" specified using format
           described in agentsList() and propensity "rate"
 
-        * setTransitionRate(String label, float rate) -- Set "rate" of
-          Transition "label"
+        * setTransitionRateOrVariable(String label, float value) -- Set rate of
+          Transition "label" or of Variable "label" to "value"
+
+        * getTransition(String label) -- Get transition labeled "label"
 
         """
         ks = self.gateway.jvm.org.demonsoft.spatialkappa.api.SpatialKappaSim(time_units, verbose, seed)

@@ -300,7 +300,10 @@ public class Utils {
     private static Random r = new Random();
 
     public static double random() {
-        return(r.nextDouble());
+        double n = r.nextDouble();
+        // FIXME: Random seed not always working?
+        // System.out.println(n);
+        return(n);
     }
 
     public static void setSeed(long seed) {
