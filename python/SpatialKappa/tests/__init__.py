@@ -20,7 +20,7 @@ class TestSpatialKappa(unittest.TestCase):
 
         flog2 = open("/tmp/SpatialKappa-seed-2.log", "w")
         sk2 = SpatialKappa.SpatialKappa(redirect_stdout=flog2)
-        sim2 = sk.kappa_sim("ms", True, 1)
+        sim2 = sk2.kappa_sim("ms", True, 1)
         sim2.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
         sim2.runForTime(5.0, True)
 
@@ -41,9 +41,9 @@ class TestSpatialKappa(unittest.TestCase):
         sim = []
         sk = []
 
-        flog1.close()
-        flog2.close()
-        flog3.close()
+        ## flog1.close()
+        ## flog2.close()
+        ## flog3.close()
         
     def test_createSpatialKappa(self):
         self.sk = SpatialKappa.SpatialKappa()
@@ -146,7 +146,7 @@ class TestSpatialKappa(unittest.TestCase):
     def tearDown(self):
         self.sim = []
         self.sk = []
-        self.flog.close()
+        ## self.flog.close()
         
 if __name__ == '__main__':
     unittest.main()
