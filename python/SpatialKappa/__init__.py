@@ -28,7 +28,7 @@ class SpatialKappa:
 
         """
         
-        skjar_file = 'SpatialKappa-v2.1.1.jar'
+        skjar_file = 'SpatialKappa-v2.1.2.jar'
         antlrjar_file = 'ant-antlr-3.2.jar'
         skjar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'share', 'SpatialKappa', skjar_file)
         antlrjar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'share', 'SpatialKappa', antlrjar_file)

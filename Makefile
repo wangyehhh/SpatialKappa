@@ -7,7 +7,7 @@
 # N.B.: The CLASSPATH has to have both parts and has to be aboslute
 CLASSPATH=$(realpath .)/src/lib/antlr-3.2.jar:$(realpath .)/ant-antlr3.jar 
 
-SKJAR_FILE = SpatialKappa-v2.1.1.jar
+SKJAR_FILE = SpatialKappa-v2.1.2.jar
 ANTLRJAR_FILE = ant-antlr-3.2.jar
 PYTHON_SHARE_DIR = python/SpatialKappa/share/SpatialKappa
 
