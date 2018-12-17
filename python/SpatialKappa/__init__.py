@@ -28,7 +28,7 @@ class SpatialKappa:
 
         """
         
-        skjar_file = 'SpatialKappa-v2.1.2.jar'
+        skjar_file = 'SpatialKappa-v2.1.3.jar'
         antlrjar_file = 'ant-antlr-3.2.jar'
         skjar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'share', 'SpatialKappa', skjar_file)
         antlrjar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'share', 'SpatialKappa', antlrjar_file)
@@ -49,78 +49,97 @@ class SpatialKappa:
         verbose -- If True, more output is printed to the connection
           specified by redirect_stdout of the parent SpatialKappa object
         seed -- Random seed
-
+        
         The object created has the following methods:
+
+        MODEL BUILDING METHODS
 
         * loadFile(String kappaFileName) -- Load a SpatialKappa file "kappaFileName" into the simulation
 
-        * getTime() -- Return time of SpatialKappa simulation
+        * addAgentDeclaration(String name, dict sites) -- Declare the
+          sites and states of an agent with name. Sites is in the format:
+          {'site1': ['state1', 'state2', ...], 'site2': ['state1', 'state2', ...]}
 
-        * runUntilTime(float stepEndTime, boolean progress) -- Run
-          simulation from current simulation time to "stepEndTime"
-          (specified in "time_units" given when creating kappa_sim.
-          Time progress shown if "progress" is True.
+        * isAgent(String name) -- Return True if "name" has been declared as an agent
 
-        * runForTime(float dt, boolean progress) -- Run simulation
-          from current simulation time for another "dt" (specified in
-          "time_units" given when creating kappa_sim. Time progress
-          shown if "progress" is True.
+        * getAgentDeclaration(String name) -- Return agent delcaration
+          in same format as addAgentDeclaration()
 
-        * getAgent(String name) -- Get an agent
-
-        * isAgent(String name) -- Return True if "name" is an agent
-
-        * getAgentMap(String agentName) -- Return map of agents as Python dict
-
-        * agentList(dict agentsMap) -- General function to allow an
-          AgentList to be created programmtically. This allows a
-          variable to be set using the following syntax in python:
+        * addInitialValue(dict complex, int|double value) -- Set the
+          intial value of a complex specified using the following dict
+          structure in python:
 
             {agent_name1: {site_name1: {"l": link_name, "s": state_name}, 
                            site_name2: {"l": link_name, "s": state_name}, ...}, 
              agent_name2: {site_name1: {"l": link_name, "s": state_name}, ...}, ...}
-            
-            e.g.:
-              {"ca": {"x": {"l": "1"}}, "P": {"x": {"l": "1"}}}
-              is equivalent to:
-              Ca(x!1),P(x!1)
 
-        * addAgent(String key, int value) -- Add "value" units of
-          agent "key" in its default configuration
-        
-        * addAgent(String key, double value) -- Same as the addAgent
-          with an int "value", but throws an error if non-int value
-          given
+          This is equivalent to 
+             %init: complex value
 
-        * setAgentInitialValue(String key, int value) -- Set initial
-          "value" of agent "key" in its default configuration
+          in SpatialKappa. This function preseves the behaviour of the
+          effect of %init lines summing. For example 
 
-        * setAgentInitialValue(String key, double value) -- Set
-          initial "value" of agent "key" in its default configuration,
-          type-safe for double
+            addInitialValue({'ca': {'x': {}}}, 20)
+            addInitialValue({'ca': {'x': {}}}, 20)
 
-        * addVariable(String label, dict agentsMap) -- Create a
-          variable "label" using the syntax as described in agentList()
+          has the effect of adding 40 ca(x), just as would:
 
-        * addVariable(String label, float input) -- Create a
-          variable "label" with value "input"
+             %init: ca(x) 20
+             %init: ca(x) 20
 
-        * getVariable(String label) -- Get value of "label"
+        * overrideInitialValue(dict complex, int|double value) --
+          The same as addInitialValue(), but overrides any existing
+          initial value for an complex.
 
-        * getVariables() -- Return variables. If "kappa_sim.verbose"
-          is True, print values
-        
-        * getObservation(String key) -- get Observation "key"
-        
         * addTransition(String label, dict leftSideAgents, dict rightSideAgents, float rate) -- 
           Create unidirectional transition labelled "label" with
           "leftSideAgents" and "rightSideAgents" specified using format
-          described in agentsList() and propensity "rate"
+          described in setInitialValue() and propensity "rate"
+
+        * addVariable(String name, dict complex) -- Create a variable
+          "name" referencing "complex" using the syntax as described
+          in addInitialValue()
+
+        * addVariable(String name, float input) -- Create a
+          variable "name" with value "input"
+
+        * isVariable(String name) -- Return True if "name" has been
+          declared as a variable
+
+        RUNTIME METHODS
+        
+        * initialiseSim() -- Initialise the simulation
+        
+        * runUntilTime(float stepEndTime, boolean progress) -- Run
+          simulation from current simulation time to "stepEndTime"
+          (specified in "time_units" given when creating kappa_sim.
+          Time progress shown if "progress" is True. Initialises if
+          not already initialised.
+
+        * runForTime(float dt, boolean progress) -- Run simulation
+          from current simulation time for another "dt" (specified in
+          "time_units" given when creating kappa_sim. Time progress
+          shown if "progress" is True. Initialises if not already
+          initialised.
+
+        * getTime() -- Return time of SpatialKappa simulation
+
+        * getVariable(String name) -- Get value of "name"
+
+        * getVariables() -- Return variables. If "kappa_sim.verbose"
+          is True, print values
+
+        * getObservation(String name) -- get Observation "name"
 
         * setTransitionRateOrVariable(String label, float value) -- Set rate of
           Transition "label" or of Variable "label" to "value"
 
-        * getTransition(String label) -- Get transition labeled "label"
+        * addAgent(String name, int value) -- Add "value" units of
+          agent "name" in its default configuration
+        
+        * addAgent(String name, double value) -- Same as the addAgent
+          with an int "value", but throws an error if non-int value
+          given
 
         """
         ks = self.gateway.jvm.org.demonsoft.spatialkappa.api.SpatialKappaSim(time_units, verbose, seed)

@@ -9,6 +9,7 @@ import org.demonsoft.spatialkappa.model.SimulationState;
 import org.demonsoft.spatialkappa.model.Agent;
 import org.demonsoft.spatialkappa.model.AgentLink;
 import org.demonsoft.spatialkappa.model.AgentSite;
+import org.demonsoft.spatialkappa.model.AggregateSite;
 import org.demonsoft.spatialkappa.model.AgentDeclaration;
 import org.demonsoft.spatialkappa.model.Observation;
 import org.demonsoft.spatialkappa.model.ObservationElement;
@@ -53,6 +54,8 @@ public class SpatialKappaSim
             throw(new IllegalArgumentException(error));
         }
         this.timeMult = (double)allowedTimeUnits.get(timeUnits);
+        this.kappaModel = new KappaModel();
+        this.simulation = null;
     }
 
     public SpatialKappaSim(String timeUnits, boolean verbose) {
@@ -63,86 +66,98 @@ public class SpatialKappaSim
         this("ms", false);
     }
 
-    public void loadFile(String kappaFileName) throws Exception {
-        kappaFile = new File(kappaFileName);
-        kappaModel = Utils.createKappaModel(kappaFile);
-        initialiseSim();
-    }
-
-    private void initialiseSim() {
-        simulation = new TransitionMatchingSimulation(kappaModel);
-    }
-
+    //////////////////////////////////////////////////////////////////////
+    // Model specification
+    //////////////////////////////////////////////////////////////////////
     
-    // General Accessor methods
+    // Agent creation
+    // e.g. addAgentDeclaration('Ca', {'x': ['a', 'b', 'c'], 'y': {'g', 'f', 'e'}}) is equivalent to
+    // Ca(x~a~b~c, y~e~f~g)
 
-    // Get the time in user units
-    public float getTime() {
-        return(simulation.getTime()/(float)timeMult);
-    }
-
-    // Get an agent
-    public Agent getAgent(String name) {
-        for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
-            for (Agent currentAgent : complex.agents) {
-                if (name.equals(currentAgent.name)) {
-                    return(currentAgent);
-                }
-            }
+    public void addAgentDeclaration(String name, Map<String,List<String>> sites) {
+        System.out.println("addAgentDeclaration");
+        System.out.println(name);
+        List<AggregateSite> sitesList = new ArrayList<AggregateSite>();
+        for (Map.Entry<String,List<String>> site: sites.entrySet()) {
+            System.out.println(site);
+            //String siteName = site.getKey();
+            sitesList.add(new AggregateSite(site.getKey(), site.getValue(), null));
+            // List<String> states = ;
         }
-        String error = "Agent " + name + " not defined in " + this.kappaFile + "\nMake sure there are both %agent: and %init: declarations.";
-        throw(new IllegalArgumentException(error));
+        
+        this.kappaModel.addAgentDeclaration(new AgentDeclaration(name, sitesList));
     }
 
-    // Test if an agent exists
+    // Test if an agent is declared
     public boolean isAgent(String name) {
-        try {
-            Agent agent = getAgent(name);
-        } catch(Exception e) {
-            return(false);
+        return(this.kappaModel.getAgentDeclarationMap().containsKey(name));
+    }
+    
+    // Get agent declaration
+    public Map<String,List<String>> getAgentDeclaration(String name) {
+        if (!isAgent(name)) {
+            String error = "Agent " + name + " not defined in " + this.kappaFile + "\nMake sure there are both %agent: and %init: declarations.";
+            throw(new IllegalArgumentException(error));
         }
-        return(true);
+        AgentDeclaration ad = this.kappaModel.getAgentDeclarationMap().get(name);
+        Map<String,List<String>> sitesMap = new HashMap<String,List<String>>();
+        List<AggregateSite> sites = ad.getSites();
+        for (AggregateSite site: sites) {
+            sitesMap.put(site.getName(), site.getStates());
+        }
+        return(sitesMap);
     }
 
-    private Map<String,Map<String,Map<String,String>>> getAgentMap(Agent agent) {
-        Map<String,Map<String,Map<String,String>>> agentMap  = new HashMap<String,Map<String,Map<String,String>>>();
-        Map<String,Map<String,String>> siteMap  = new HashMap<String,Map<String,String>>();
-        Collection<AgentSite> sites = agent.getSites();
-        for (AgentSite site : sites) {
-            Map<String,String> siteLinkState = new HashMap<String,String>();
-            if (site.getLinkName() != null) {
-                siteLinkState.put("l", site.getLinkName());
+    // Initialisation methods
+    // Equivalent to %init: This version adds to the list of init lines
+    public void addInitialValue(Map<String,Map<String,Map<String,String>>> agents, int value) {
+        kappaModel.addInitialValue(agentList(agents), Integer.toString(value), NOT_LOCATED);
+    };
+    public void addInitialValue(Map<String,Map<String,Map<String,String>>> agents, double value) {
+        addInitialValue(agents, (int)value);
+    };
+    
+    // Not equivalent to %init: This version overrides existing init lines with matching agents
+    public void overrideInitialValue(Map<String,Map<String,Map<String,String>>> agents, int value) {
+        kappaModel.overrideInitialValue(agentList(agents), Integer.toString(value), NOT_LOCATED);
+    };
+    public void overrideInitialValue(Map<String,Map<String,Map<String,String>>> agents, double value) {
+        overrideInitialValue(agents, (int)value);
+    };
+
+    // Variables interface
+    public void addVariable(String label, float input) {
+        kappaModel.addVariable(new VariableExpression(input), label);
+    }
+
+    // This allows a variable to be set using the syntax as described in agentList()
+    public void addVariable(String label, Map<String,Map<String,Map<String,String>>> agentsMap) {
+        List<Agent> agents = agentList(agentsMap);
+        kappaModel.addVariable(agents, label, NOT_LOCATED, false);
+    }
+
+    // Test if a variable exists
+    public boolean isVariable(String name) {
+        return(kappaModel.getVariables().containsKey(name));
+    }
+    
+    // Limited version of addTransition(), just enough to make a creation rule
+    public void addTransition(String label, 
+                                    Map<String,Map<String,Map<String,String>>> leftSideAgents, 
+                                    Map<String,Map<String,Map<String,String>>> rightSideAgents, 
+                                    float rate) {
+        List<Transition> transitions = kappaModel.getTransitions();
+        for (Transition transition: transitions) {
+            if (label.equals(transition.label)) {
+                String error = "Transition label \"" + label + "\" already exists";
+                throw(new IllegalArgumentException(error));
             }
-            if (site.getState() != null) {
-                siteLinkState.put("s", site.getState());
-            }
-            siteMap.put(site.name, siteLinkState);
         }
-        agentMap.put(agent.name, siteMap);
-        return(agentMap);
-    }
-
-    public Map<String,Map<String,Map<String,String>>> getAgentMap(String agentName) {
-        return(getAgentMap(getAgent(agentName)));
-    }
-
-
-    // Run methods
-    // stepEndTime is provided in user units
-    public void runUntilTime(float stepEndTime, boolean progress) {
-        simulation.runByTime2(stepEndTime*(float)timeMult, progress);
-        if (verbose) {
-            // This allows us to get the value of a particular observable
-            Observation observation = simulation.getCurrentObservation();
-            System.out.println(observation.toString());
-        }
-    }
-
-    // test_runForTime
-    // dt is provided in user units
-    public void runForTime(float dt, boolean progress) {
-        float stepEndTime = getTime() + dt;
-        runUntilTime(stepEndTime, progress);
+        kappaModel.addTransition(label, 
+                                 null, agentList(leftSideAgents), 
+                                 null, 
+                                 null, agentList(rightSideAgents), 
+                                 new VariableExpression(rate));
     }
 
     // General function to allow an AgentList to be created programmtically.     
@@ -156,16 +171,18 @@ public class SpatialKappaSim
         for (Map.Entry<String,Map<String,Map<String,String>>> entry: agentsMap.entrySet()) {
             String agentName = entry.getKey();
             Map<String,Map<String,String>> sites = entry.getValue();
-            Agent tmpAgent = getAgent(agentName);
-            Agent agent = tmpAgent.clone();
+            AgentDeclaration agentDeclaration = kappaModel.getAgentDeclarationMap().get(agentName);
+            Map<String, AggregateSite> agentDeclarationSites = new HashMap<String, AggregateSite>();
+            for (AggregateSite ads: agentDeclaration.getSites()) {
+                agentDeclarationSites.put(ads.getName(), ads);
+            }
+            Agent agent = new Agent(agentDeclaration.getName());
             for (Map.Entry<String,Map<String,String>> site: sites.entrySet()) {
                 String siteName = site.getKey();
-                AgentSite agentSite = agent.getSite(siteName);
-                if (agentSite == null) {
+                if (!agentDeclarationSites.containsKey(siteName)) {
                     String error = "Agent \"" +  agentName + "\" does not have a site \"" + siteName + "\"";
                     throw(new IllegalArgumentException(error));
                 }
-
                 Map<String,String> siteLinkState = site.getValue();
                 for (String key: siteLinkState.keySet()) {
                     Set<String> validKeys = new HashSet<String>() {{add("l"); add("s");}};
@@ -174,30 +191,70 @@ public class SpatialKappaSim
                         throw(new IllegalArgumentException(error));
                     }
                 }
+                String linkName = null;
                 if (siteLinkState.keySet().contains("l")) {
-                    agentSite.setLinkName(siteLinkState.get("l"));
+                    linkName = site.getValue().get("l");
                 }
+                String state = null;
                 if (siteLinkState.keySet().contains("s")) {
-                    agentSite.setState(site.getValue().get("s"));
+                    state = siteLinkState.get("s");
+                    if (!agentDeclarationSites.get(siteName).getStates().contains(state)) {
+                        String error = "Agent \"" +  agentName + "\" site name  \"" + siteName + "\" does not have state " + state;
+                        throw(new IllegalArgumentException(error));
+
+                    }
                 }
+                AgentSite agentSite = new AgentSite(siteName, state, linkName);
+                agent.addSite(agentSite);
+
             }
             agents.add(agent);
         }
         return(agents);
     }
 
-    // Variables interface
-    public void addVariable(String label, float input) {
-        kappaModel.addVariable(new VariableExpression(input), label);
-        initialiseSim();
+    public void loadFile(String kappaFileName) throws Exception {
+        kappaFile = new File(kappaFileName);
+        kappaModel = Utils.createKappaModel(kappaFile);
     }
 
-    // This allows a variable to be set using the syntax as described in agentList()
-    public void addVariable(String label, Map<String,Map<String,Map<String,String>>> agentsMap) {
-        List<Agent> agents = agentList(agentsMap);
-        kappaModel.addVariable(agents, label, NOT_LOCATED, false);
-        initialiseSim();
+    public void initialiseSim() {
+        simulation = new TransitionMatchingSimulation(kappaModel);
     }
+    
+    // General Accessor methods
+
+    // Get the time in user units
+    public float getTime() {
+        return(simulation.getTime()/(float)timeMult);
+    }
+
+    
+    //////////////////////////////////////////////////////////////////////
+    // Model simulation
+    //////////////////////////////////////////////////////////////////////
+    
+    // Run methods
+    // stepEndTime is provided in user units
+    public void runUntilTime(float stepEndTime, boolean progress) {
+        if (simulation == null) { initialiseSim(); };
+        simulation.runByTime2(stepEndTime*(float)timeMult, progress);
+        if (verbose) {
+            // This allows us to get the value of a particular observable
+            Observation observation = simulation.getCurrentObservation();
+            System.out.println(observation.toString());
+        }
+    }
+
+    // test_runForTime
+    // dt is provided in user units
+    public void runForTime(float dt, boolean progress) {
+        if (simulation == null) { initialiseSim(); };
+        float stepEndTime = getTime() + dt;
+        runUntilTime(stepEndTime, progress);
+    }
+
+
 
     public double getVariable(String variableName) {
         Variable variable = kappaModel.getVariables().get(variableName);
@@ -214,51 +271,32 @@ public class SpatialKappaSim
         }
         return(variables);
     }
-
+    
     // Observation interface
     public double getObservation(String key) {
         Observation observation = simulation.getCurrentObservation();
         return(observation.observables.get(key).value);
     }
 
+
     // Transition interface
     public Transition getTransition(String label) {
+        if (simulation == null) {
+            for (Transition transition: kappaModel.getTransitions()) {
+                if (label.equals(transition.label)) {
+                    return transition;
+                }
+            }
+            return (Transition) null;
+        }
         return simulation.getTransition(label);
     }
-
-    // Limited version of addTransition(), just enough to make a creation rule
-    public Transition addTransition(String label, 
-                                    Map<String,Map<String,Map<String,String>>> leftSideAgents, 
-                                    Map<String,Map<String,Map<String,String>>> rightSideAgents, 
-                                    float rate) {
-        List<Transition> transitions = kappaModel.getTransitions();
-        for (Transition transition: transitions) {
-            if (label.equals(transition.label)) {
-                String error = "Transition label \"" + label + "\" already exists";
-                throw(new IllegalArgumentException(error));
-            }
-        }
-        kappaModel.addTransition(label, 
-                                 null, agentList(leftSideAgents), 
-                                 null, 
-                                 null, agentList(rightSideAgents), 
-                                 new VariableExpression(rate));
-        initialiseSim();
-
-        // Returning the transition may not be strictly necessary
-        transitions = kappaModel.getTransitions();
-        for (Transition transition: transitions) {
-            if (label.equals(transition.label)) {
-                return transition;
-            }
-        }
-        return (Transition) null; 
-    }
-
+    
     public void setTransitionRateOrVariable(String label, float rate) {
         simulation.setTransitionRateOrVariable(label, new VariableExpression(rate));
     }
 
+    
     // Agent interface
     // value can be negative
     public void addAgent(String key, int value) {
@@ -279,21 +317,6 @@ public class SpatialKappaSim
         addAgent(key, (int)value);
     }
 
-    public void setAgentInitialValue(String key, int value) {
-        List<Agent> agents = new ArrayList<Agent>();
-        Agent agent = getAgent(key);
-        if (agent != null) {
-            agents.add(agent);
-            kappaModel.overrideInitialValue(agents, Integer.toString(value), NOT_LOCATED);
-            agents.clear();
-        }
-        initialiseSim();
-        if (verbose) { System.out.println("Number of " + key + " is " +  getVariable(key)); }
-    }
-
-    public void setAgentInitialValue(String key, double value) {
-        setAgentInitialValue(key, (int)value);
-    }
 
     // Printing methods
     @Override
@@ -334,6 +357,63 @@ public class SpatialKappaSim
             }
         }
         return interactions.toString();
+    }
+
+    // FIXME: Pending removal
+    // Get an agent
+    private Agent getAgent(String name) {
+        for (Complex complex : kappaModel.getFixedLocatedInitialValuesMap().keySet()) {
+            for (Agent currentAgent : complex.agents) {
+                if (name.equals(currentAgent.name)) {
+                    return(currentAgent);
+                }
+            }
+        }
+        String error = "Agent " + name + " not defined in " + this.kappaFile + "\nMake sure there are both %agent: and %init: declarations.";
+        throw(new IllegalArgumentException(error));
+    }
+
+    private Map<String,Map<String,Map<String,String>>> getAgentMap(Agent agent) {
+        Map<String,Map<String,Map<String,String>>> agentMap  = new HashMap<String,Map<String,Map<String,String>>>();
+        Map<String,Map<String,String>> siteMap  = new HashMap<String,Map<String,String>>();
+        Collection<AgentSite> sites = agent.getSites();
+        for (AgentSite site : sites) {
+            Map<String,String> siteLinkState = new HashMap<String,String>();
+            if (site.getLinkName() != null) {
+                siteLinkState.put("l", site.getLinkName());
+            }
+            if (site.getState() != null) {
+                siteLinkState.put("s", site.getState());
+            }
+            siteMap.put(site.name, siteLinkState);
+        }
+        agentMap.put(agent.name, siteMap);
+        return(agentMap);
+    }
+
+    private void overrideInitialValue(List<Agent> agents, int value) {
+        kappaModel.addInitialValue(agents, Integer.toString(value), NOT_LOCATED);
+    };
+    
+    public void setAgentInitialValue(String key, int value) {
+        List<Agent> agents = new ArrayList<Agent>();
+        Agent agent = getAgent(key);
+        if (agent != null) {
+
+            agents.add(agent);
+            overrideInitialValue(agents, value);
+            agents.clear();
+        }
+        initialiseSim();
+        if (verbose) { System.out.println("Number of " + key + " is " +  getVariable(key)); }
+    }
+
+    public void setAgentInitialValue(String key, double value) {
+        setAgentInitialValue(key, (int)value);
+    }
+    
+    private Map<String,Map<String,Map<String,String>>> getAgentMap(String agentName) {
+        return(getAgentMap(getAgent(agentName)));
     }
 
     public void setSeed(long seed) throws Exception {
