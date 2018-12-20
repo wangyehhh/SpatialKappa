@@ -128,6 +128,11 @@ public class SpatialKappaSim
         kappaModel.overrideInitialValue(agents, Integer.toString(value), NOT_LOCATED);
     };
 
+    public void overrideInitialValue(List<Agent> agents, float value) {
+        overrideInitialValue(agents, (int)value);
+    };
+
+    
     public void overrideInitialValue(Map<String,Map<String,Map<String,String>>> agents, int value) {
         overrideInitialValue(agentList(agents), value);
     };
@@ -152,6 +157,18 @@ public class SpatialKappaSim
     public boolean isVariable(String name) {
         report("isVariable(%s)", name);
         return(kappaModel.getVariables().containsKey(name));
+    }
+
+    public Complex getVariableComplex(String name) throws Exception {
+        report("getVariableComplex(%s)", name);
+        if (!isVariable(name)) {
+            throw(new Exception(name + " is not a variable"));
+        }
+        Variable var = kappaModel.getVariables().get(name);
+        if (var.type != Variable.Type.KAPPA_EXPRESSION) {
+            throw(new Exception("Variable " + name + " is not Kappa expression"));
+        }
+        return(var.complex);
     }
     
     // Limited version of addTransition(), just enough to make a creation rule
@@ -227,6 +244,10 @@ public class SpatialKappaSim
         return(agents);
     }
 
+    public List<Agent> agentList(Complex complex) {
+        return(complex.agents);
+    }
+    
     public void loadFile(String kappaFileName) throws Exception {
         report("loadFile(%s)", kappaFileName);
         kappaFile = new File(kappaFileName);

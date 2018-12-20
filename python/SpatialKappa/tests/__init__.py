@@ -171,11 +171,25 @@ class TestSpatialKappa(unittest.TestCase):
         self.sim.addAgentDeclaration('A', {'x': []})
         self.sim.overrideInitialValue({'A': {'x': {}}}, 1)
         ## self.sim.overrideInitialValue({"ca": {"nonexistent_site_name": {"l": "?"}}}, 2)
+
+    def test_getVariableComplex(self):
+        self.sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
+
+        try:
+            self.sim.getVariableComplex('gamma1')
+        except Py4JJavaError:
+            error = True
+        self.assertTrue(error)
+        self.sim.getVariableComplex('P-Ca')
+        self.sim.agentList(self.sim.getVariableComplex('P-Ca'))
+        self.sim.overrideInitialValue(self.sim.agentList(self.sim.getVariableComplex('P-Ca')), 10)
+        self.sim.initialiseSim()
+        self.assertEqual(self.sim.getVariable('P-Ca'), 10)
         
     def tearDown(self):
         self.sim = []
         self.sk = []
-        ## self.flog.close()
+        self.flog.close()
         
 if __name__ == '__main__':
     unittest.main()
