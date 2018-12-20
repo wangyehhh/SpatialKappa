@@ -134,7 +134,9 @@ class TestSpatialKappa(unittest.TestCase):
         self.sim = self.sk.kappa_sim("ms", True)
         self.sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/no_init.ka")
         self.assertTrue(self.sim.isAgent('ca'))
+        self.assertFalse(self.sim.isInitialised())
         self.sim.initialiseSim()
+        self.assertTrue(self.sim.isInitialised())
         # error = False
         # try:
         #     self.sim.getAgentDeclaration('ca')

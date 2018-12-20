@@ -154,9 +154,9 @@ public class SpatialKappaSim
             }
         }
         kappaModel.addTransition(label, 
-                                 null, agentList(leftSideAgents), 
+                                 NOT_LOCATED, agentList(leftSideAgents), 
                                  null, 
-                                 null, agentList(rightSideAgents), 
+                                 NOT_LOCATED, agentList(rightSideAgents), 
                                  new VariableExpression(rate));
     }
 
@@ -220,6 +220,11 @@ public class SpatialKappaSim
 
     public void initialiseSim() {
         simulation = new TransitionMatchingSimulation(kappaModel);
+    }
+
+    public boolean isInitialised() {
+        report("isIntialised()");
+        return(simulation != null);
     }
     
     // General Accessor methods
@@ -390,10 +395,6 @@ public class SpatialKappaSim
         agentMap.put(agent.name, siteMap);
         return(agentMap);
     }
-
-    private void overrideInitialValue(List<Agent> agents, int value) {
-        kappaModel.addInitialValue(agents, Integer.toString(value), NOT_LOCATED);
-    };
     
     public void setAgentInitialValue(String key, int value) {
         List<Agent> agents = new ArrayList<Agent>();
@@ -404,8 +405,6 @@ public class SpatialKappaSim
             overrideInitialValue(agents, value);
             agents.clear();
         }
-        initialiseSim();
-        if (verbose) { System.out.println("Number of " + key + " is " +  getVariable(key)); }
     }
 
     public void setAgentInitialValue(String key, double value) {
