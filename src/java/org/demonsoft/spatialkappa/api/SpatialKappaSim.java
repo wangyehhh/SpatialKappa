@@ -42,6 +42,7 @@ public class SpatialKappaSim
 
     // Constructors
     public SpatialKappaSim(String timeUnits, boolean verbose, Long seed) {
+        report("SpatialKappaSim(%s, %d, %d)", timeUnits, verbose, seed);
         if (seed != null) {
             Utils.setSeed(seed.longValue());
         }
@@ -67,6 +68,14 @@ public class SpatialKappaSim
     }
 
     //////////////////////////////////////////////////////////////////////
+    // Helpers
+    //////////////////////////////////////////////////////////////////////
+
+    private void report(String format, Object... args) {
+        if (verbose) System.out.printf(format + "\n", args);
+    }
+    
+    //////////////////////////////////////////////////////////////////////
     // Model specification
     //////////////////////////////////////////////////////////////////////
     
@@ -75,26 +84,22 @@ public class SpatialKappaSim
     // Ca(x~a~b~c, y~e~f~g)
 
     public void addAgentDeclaration(String name, Map<String,List<String>> sites) {
-        System.out.println("addAgentDeclaration");
-        System.out.println(name);
         List<AggregateSite> sitesList = new ArrayList<AggregateSite>();
         for (Map.Entry<String,List<String>> site: sites.entrySet()) {
-            System.out.println(site);
-            //String siteName = site.getKey();
             sitesList.add(new AggregateSite(site.getKey(), site.getValue(), null));
-            // List<String> states = ;
         }
-        
         this.kappaModel.addAgentDeclaration(new AgentDeclaration(name, sitesList));
     }
 
     // Test if an agent is declared
     public boolean isAgent(String name) {
+        report("isAgent(%s)", name);
         return(this.kappaModel.getAgentDeclarationMap().containsKey(name));
     }
     
     // Get agent declaration
     public Map<String,List<String>> getAgentDeclaration(String name) {
+        report("getAgentDeclaration(%s)", name);
         if (!isAgent(name)) {
             String error = "Agent " + name + " not defined in " + this.kappaFile + "\nMake sure there are both %agent: and %init: declarations.";
             throw(new IllegalArgumentException(error));
@@ -118,8 +123,13 @@ public class SpatialKappaSim
     };
     
     // Not equivalent to %init: This version overrides existing init lines with matching agents
+    public void overrideInitialValue(List<Agent> agents, int value) {
+        report("overrideInitialValue(<agents>, %d)", value);
+        kappaModel.overrideInitialValue(agents, Integer.toString(value), NOT_LOCATED);
+    };
+
     public void overrideInitialValue(Map<String,Map<String,Map<String,String>>> agents, int value) {
-        kappaModel.overrideInitialValue(agentList(agents), Integer.toString(value), NOT_LOCATED);
+        overrideInitialValue(agentList(agents), value);
     };
     public void overrideInitialValue(Map<String,Map<String,Map<String,String>>> agents, double value) {
         overrideInitialValue(agents, (int)value);
@@ -127,17 +137,20 @@ public class SpatialKappaSim
 
     // Variables interface
     public void addVariable(String label, float input) {
+        report("addVariable(%s, %f)", label, input);
         kappaModel.addVariable(new VariableExpression(input), label);
     }
 
     // This allows a variable to be set using the syntax as described in agentList()
     public void addVariable(String label, Map<String,Map<String,Map<String,String>>> agentsMap) {
+        report("addVariable(%s, <agentsMap>)", label);
         List<Agent> agents = agentList(agentsMap);
         kappaModel.addVariable(agents, label, NOT_LOCATED, false);
     }
 
     // Test if a variable exists
     public boolean isVariable(String name) {
+        report("isVariable(%s)", name);
         return(kappaModel.getVariables().containsKey(name));
     }
     
@@ -146,6 +159,7 @@ public class SpatialKappaSim
                                     Map<String,Map<String,Map<String,String>>> leftSideAgents, 
                                     Map<String,Map<String,Map<String,String>>> rightSideAgents, 
                                     float rate) {
+        report("addTransition(%s, <leftSideAgents>, <rightSideAgents>, %f)", label, rate);
         List<Transition> transitions = kappaModel.getTransitions();
         for (Transition transition: transitions) {
             if (label.equals(transition.label)) {
@@ -214,11 +228,13 @@ public class SpatialKappaSim
     }
 
     public void loadFile(String kappaFileName) throws Exception {
+        report("loadFile(%s)", kappaFileName);
         kappaFile = new File(kappaFileName);
         kappaModel = Utils.createKappaModel(kappaFile);
     }
 
     public void initialiseSim() {
+        report("initialiseSim()");
         simulation = new TransitionMatchingSimulation(kappaModel);
     }
 
@@ -231,6 +247,7 @@ public class SpatialKappaSim
 
     // Get the time in user units
     public float getTime() {
+        report("getTime()");
         return(simulation.getTime()/(float)timeMult);
     }
 
@@ -254,14 +271,17 @@ public class SpatialKappaSim
     // test_runForTime
     // dt is provided in user units
     public void runForTime(float dt, boolean progress) {
+        report("runForTime(%f)", dt);
         if (simulation == null) { initialiseSim(); };
         float stepEndTime = getTime() + dt;
         runUntilTime(stepEndTime, progress);
     }
 
-
-
-    public double getVariable(String variableName) {
+    public double getVariable(String variableName) throws Exception {
+        report("getVariable(%s)", variableName);
+        if (simulation == null) {
+            throw(new Exception("Simulation is not initialised, so not possble to get value of variable '" + variableName + "'"));
+        }
         Variable variable = kappaModel.getVariables().get(variableName);
         ObservationElement observable = variable.evaluate(simulation);
         return(observable.value);
@@ -269,11 +289,6 @@ public class SpatialKappaSim
     
     public Map<String, Variable> getVariables() {
         Map<String, Variable> variables = kappaModel.getVariables();
-        if (verbose) {
-            for (Map.Entry<String, Variable> variable : variables.entrySet()) {
-                System.out.println("Key = " + variable.getKey() + ", Value = " + variable.getValue());
-            }
-        }
         return(variables);
     }
     
@@ -297,10 +312,13 @@ public class SpatialKappaSim
         return simulation.getTransition(label);
     }
     
-    public void setTransitionRateOrVariable(String label, float rate) {
+    public void setTransitionRateOrVariable(String label, float rate) throws Exception {
+        report("setTransitionRateOrVariable(%s, %f)", label, rate);
+        if (!isInitialised()) {
+            throw(new Exception("Simulation not initalised. Initialise using initialSim()"));
+        }
         simulation.setTransitionRateOrVariable(label, new VariableExpression(rate));
     }
-
     
     // Agent interface
     // value can be negative
@@ -329,7 +347,7 @@ public class SpatialKappaSim
         return(kappaModel.toString());
     }
 
-    private void printFixedLocatedInitialValuesMap() {
+    public void printFixedLocatedInitialValuesMap() {
         for (Map.Entry<Complex, Integer> result : kappaModel.getFixedLocatedInitialValuesMap().entrySet()) {
             System.out.println("Key = " + result.getKey() + ", Value = " + result.getValue());
         }
