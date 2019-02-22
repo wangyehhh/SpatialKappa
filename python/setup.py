@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = '2.1.2'
+VERSION = '2.1.3'
 POSTVERSION = ''
 
 with open("README.md", "r") as fh:
