@@ -24,11 +24,12 @@ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ```
 virtualenv SpatialKappa
 source SpatialKappa/bin/activate
+PYTHONPATH=
 ```
 
 5. Test in virtual environment
 ```
-python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/  SpatialKappa==2.1.2
+python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/  SpatialKappa==2.1.4
 python -m unittest SpatialKappa.tests
 
 ```

@@ -68,14 +68,14 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
     
     private boolean stop = false;
     private boolean noTransitionsPossible = false;
-    private float time = 0;
+    private double time = 0;
     private long startTime;
     int eventCount = 0;
     
     private final IKappaModel kappaModel;
     private final List<ObservationListener> observationListeners = new ArrayList<ObservationListener>();
     private final ComplexMatcher matcher = new ComplexMatcher();
-    private float maximumTime;
+    private double maximumTime;
     private int maximumEventCount;
     private boolean verbose = false;
     
@@ -177,7 +177,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         notifyObservationListeners(true, 1);
     }
 
-    public void runByTime(float totalTime, float timePerStep) {
+    public void runByTime(double totalTime, double timePerStep) {
         startTime = Calendar.getInstance().getTimeInMillis();
         stop = false;
         maximumTime = totalTime;
@@ -185,7 +185,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
 
         do {
             resetTransitionsFiredCount();
-            float stepEndTime = getNextEndTime(time, timePerStep);
+            double stepEndTime = getNextEndTime(time, timePerStep);
             while (time < stepEndTime && !noTransitionsPossible && !stop) {
                 int clashes = 0;
                 while (!runSingleEvent() && clashes < 1000 && !noTransitionsPossible && !stop) {
@@ -197,16 +197,13 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                     System.out.println("Aborted timepoint");
                 }
             }
-            notifyObservationListeners(false, time / totalTime);
+            notifyObservationListeners(false, (float)(time / totalTime));
         }
         while (!noTransitionsPossible && !stop && time < totalTime);
         notifyObservationListeners(true, 1);
     }
-    public void runByTime2(float stepEndTime) {
-        runByTime2(stepEndTime, true);
-    }
 
-    public void runByTime2(float stepEndTime, boolean progress) {
+    public void runByTime2(double stepEndTime, boolean progress) throws Exception {
         if (verbose) {
             System.out.println("\rTime = " + time + " / " + stepEndTime + " [" + time/stepEndTime*100 + "%]");
         }
@@ -224,9 +221,13 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                 if (progress) {
                     System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]", time, stepEndTime, time/stepEndTime*100);
                 }
-                float nextEventTime = time + getTimeDelta();
+                double dt = getTimeDelta();
+                if ((Math.log10(time) - Math.log10(dt)) > 12.0) {
+                    throw new Exception("dt is more than 12 orders of magnitude smaller than time.");
+                }
+                double nextEventTime = time + dt;
                 if (verbose) {
-                    System.out.println("runByTime2: nextEventTime = " + nextEventTime);
+                    System.out.printf("runByTime2: nextEventTime = %f; t1 -t0 = %f\n", nextEventTime, nextEventTime - time);
                 }
                 if (nextEventTime > stepEndTime) {
                     time = stepEndTime;
@@ -255,8 +256,8 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         notifyObservationListeners(true, 1);
     }
 
-    float getNextEndTime(float currentTime, float timePerStep) {
-        int eventsSoFar = Math.round(currentTime / timePerStep);
+    double getNextEndTime(double currentTime, double timePerStep) {
+        long eventsSoFar = Math.round(currentTime / timePerStep);
         return timePerStep * (eventsSoFar + 1);
     }
 
@@ -284,18 +285,18 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return eventCount;
     }
     
-    public float getTime() {
+    public double getTime() {
         return time;
     }
 
-    public float getElapsedTime() {
+    public double getElapsedTime() {
         if (startTime == 0) {
             return 0;
         }
         return (Calendar.getInstance().getTimeInMillis() - startTime) / 1000f;
     }
 
-    public float getMaximumTime() {
+    public double getMaximumTime() {
         return maximumTime;
     }
 
@@ -317,7 +318,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         }
         long elapsedTime = Calendar.getInstance().getTimeInMillis() - startTime;
         long estimatedRemainingTime = ((long) (elapsedTime / progress)) - elapsedTime;
-        return new Observation(time, eventCount, kappaModel.getPlottedVariables(), result, finalEvent, elapsedTime, estimatedRemainingTime);
+        return new Observation((float)time, eventCount, kappaModel.getPlottedVariables(), result, finalEvent, elapsedTime, estimatedRemainingTime);
     }
 
     private boolean runSingleEvent() {
@@ -328,7 +329,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return applyFiniteRateTransition();
     }
 
-    private boolean runSingleEvent2(float transitionTime) {
+    private boolean runSingleEvent2(double transitionTime) {
         if (verbose) {
             System.out.println("runSingleEvent2: transitionTime = " + transitionTime);
         }
@@ -391,15 +392,16 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         }
     }
 
-    private float getTimeDelta() {
+    private double getTimeDelta() {
         float totalQuantity = 0;
         for (Float current : finiteRateTransitionActivityMap.values()) {
             totalQuantity += current;
         }
+        double dt = -Math.log(Utils.random()) / totalQuantity;
         if (verbose) {
-            System.out.println("getTimeDelta: totalQuantity = " + totalQuantity);
+            System.out.printf("getTimeDelta: totalQuantity = %f; dt = %f\n", totalQuantity, dt);
         }
-        return (float) -Math.log(Utils.random()) / totalQuantity;
+        return dt;
     }
 
     private Transition pickFiniteRateTransition() {

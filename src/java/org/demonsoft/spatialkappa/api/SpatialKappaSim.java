@@ -267,9 +267,9 @@ public class SpatialKappaSim
     // General Accessor methods
 
     // Get the time in user units
-    public float getTime() {
+    public double getTime() {
         report("getTime()");
-        return(simulation.getTime()/(float)timeMult);
+        return(simulation.getTime()/timeMult);
     }
 
     
@@ -279,9 +279,14 @@ public class SpatialKappaSim
     
     // Run methods
     // stepEndTime is provided in user units
-    public void runUntilTime(float stepEndTime, boolean progress) {
+    public void runUntilTime(double stepEndTime, boolean progress) throws Exception {
         if (simulation == null) { initialiseSim(); };
-        simulation.runByTime2(stepEndTime*(float)timeMult, progress);
+        try {
+            simulation.runByTime2(stepEndTime*timeMult, progress);
+        }
+        catch (Exception ex) {
+            throw new Exception("Problem running simulation", ex);
+        }
         if (verbose) {
             // This allows us to get the value of a particular observable
             Observation observation = simulation.getCurrentObservation();
@@ -291,11 +296,15 @@ public class SpatialKappaSim
 
     // test_runForTime
     // dt is provided in user units
-    public void runForTime(float dt, boolean progress) {
+    public void runForTime(double dt, boolean progress) throws Exception {
         report("runForTime(%f)", dt);
         if (simulation == null) { initialiseSim(); };
-        float stepEndTime = getTime() + dt;
-        runUntilTime(stepEndTime, progress);
+        double stepEndTime = getTime() + dt;
+        try {
+            runUntilTime(stepEndTime, progress);
+        } catch (Exception ex) {
+            throw(new Exception("Problem running simulation", ex));
+        }
     }
 
     public double getVariable(String variableName) throws Exception {
