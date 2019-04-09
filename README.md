@@ -17,8 +17,18 @@ of Kappa to allow expression of location and transport in models. A user manual 
 
 Feel free to add bug reports or feature requests [here][bug-link].
 
-COMPILATION AND INSTALLATION
-----------------------------
+INSTALLATION
+------------
+
+Either 
+
+1. Run the standalone jar file (SpatialKappa-v2.1.3.jar)
+2. Install the python interface using pip:
+```pip install SpatialKappa``` and then test using ```python -m unittest SpatialKappa.tests```. Within python ```help(SpatialKappa)``` gives the list of model-building and control functions.
+
+
+COMPILATION
+-----------
 
 To make the `SpatialKappa.jar` file either:
 
