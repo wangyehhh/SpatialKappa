@@ -211,25 +211,31 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         stop = false;
         maximumTime = stepEndTime;
         maximumEventCount = 0;
-          
+
+        // Time at start of step
+        double time0 = time;
+        // Local time in step
+        double ltime = 0;
+        // Local step end time
+        double lStepEndTime = stepEndTime - time0;
         do {
             if (verbose) {
                 System.out.println("runByTime2: resetTransitionsFiredCount()");
             }
             resetTransitionsFiredCount();
-            while (time < stepEndTime && !noTransitionsPossible && !stop) {
+            while (ltime < lStepEndTime && !noTransitionsPossible && !stop) {
                 if (progress) {
                     System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]", time, stepEndTime, time/stepEndTime*100);
                 }
                 double dt = getTimeDelta();
-                if ((Math.log10(time) - Math.log10(dt)) > 12.0) {
-                    throw new Exception("dt is more than 12 orders of magnitude smaller than time.");
+                if ((Math.log10(ltime) - Math.log10(dt)) > 12.0) {
+                    throw new Exception("dt is more than 12 orders of magnitude smaller than local time.");
                 }
-                double nextEventTime = time + dt;
+                double lNextEventTime = ltime + dt;
                 if (verbose) {
-                    System.out.printf("runByTime2: nextEventTime = %f; t1 -t0 = %f\n", nextEventTime, nextEventTime - time);
+                    System.out.printf("runByTime2: local nextEventTime = %f; t1 -t0 = %f\n", lNextEventTime, lNextEventTime - ltime);
                 }
-                if (nextEventTime > stepEndTime) {
+                if (lNextEventTime > lStepEndTime) {
                     time = stepEndTime;
                     notifyObservationListeners(true, 1);
                     if (progress) {
@@ -239,11 +245,12 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
                     return;
                 }
                 int clashes = 0;
-                while (!runSingleEvent2(nextEventTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
+                while (!runSingleEvent2(time0, lNextEventTime) && clashes < 1000 && !noTransitionsPossible && !stop) {
                     // repeat
                     clashes++;
                     Thread.yield();
                 }
+                ltime = ltime + dt;
                 if (verbose) {
                     System.out.println("Event happened. time = " + time);
                 }
@@ -329,7 +336,7 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         return applyFiniteRateTransition();
     }
 
-    private boolean runSingleEvent2(double transitionTime) {
+    private boolean runSingleEvent2(double time0, double transitionTime) {
         if (verbose) {
             System.out.println("runSingleEvent2: transitionTime = " + transitionTime);
         }
@@ -343,9 +350,10 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
             return false;
         }	
         if (applyTransition(transition, false)) {
-            time = transitionTime;	
+            time = time0 + transitionTime;
             if (verbose) {
-                System.out.print("runSingleEvent2: Applying transition. time = " + time + "\n");
+                System.out.print("runSingleEvent2: Applying transition. local time = " + transitionTime + "\n");
+                System.out.print("runSingleEvent2: Applying transition. global time = " + time + "\n");
             }
             return true;
         } else {
