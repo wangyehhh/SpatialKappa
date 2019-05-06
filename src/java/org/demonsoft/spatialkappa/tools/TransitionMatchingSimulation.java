@@ -219,10 +219,11 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         // Local step end time
         double lStepEndTime = stepEndTime - time0;
         do {
-            if (verbose) {
-                System.out.println("runByTime2: resetTransitionsFiredCount()");
-            }
-            resetTransitionsFiredCount();
+            // DCS: 2019-05-05: This appears to be soley for reporting
+            // if (verbose) {
+            // System.out.println("runByTime2: resetTransitionsFiredCount()");
+            // }
+            // resetTransitionsFiredCount();
             while (ltime < lStepEndTime && !noTransitionsPossible && !stop) {
                 if (progress) {
                     System.out.format("\rTime = %12.5f/%5.5f [%3.3f%%]", time, stepEndTime, time/stepEndTime*100);
