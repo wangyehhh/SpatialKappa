@@ -412,6 +412,10 @@ public class SpatialKappaSim
         return interactions.toString();
     }
 
+    public String getDebugOutput() {
+        return(simulation.getDebugOutput());
+    }
+    
     // FIXME: Pending removal
     // Get an agent
     private Agent getAgent(String name) {

@@ -781,6 +781,10 @@ public class TransitionMatchingSimulation implements Simulation, SimulationState
         for (Map.Entry<String, Integer> entry : getCountsPerAgent().entrySet()) {
             builder.append(entry.getValue() + "\t" + entry.getKey() + "\n");
         }
+        builder.append("\nTransitions fired:" + "\n");
+        for (Map.Entry<Variable, Integer> entry : transitionsFiredMap.entrySet()) {
+            builder.append(entry.getKey().toString() + "\t" + entry.getValue() + "\n");
+        }
         return builder.toString();
     }
 
