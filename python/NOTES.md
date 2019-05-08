@@ -30,7 +30,7 @@ PYTHONPATH=
 
 5. Test in virtual environment
 ```
-python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/  SpatialKappa==2.1.4
+python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url=https://pypi.org/simple/  SpatialKappa==2.1.5
 python -m unittest SpatialKappa.tests
 
 ```
