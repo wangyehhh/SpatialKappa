@@ -11,8 +11,8 @@ python2 setup.py test
 
 2. Build package
 ```
-rm -f build/*
-rm -f dist/*
+rm -Rf build/*
+rm -Rf dist/*
 python setup.py sdist bdist_wheel
 ```
 
