@@ -6,7 +6,7 @@ SpatialKappa
 <p style="text-align: center;">Copyright &copy; 2012 DemonSoft.org
 &lt;<a
 href="http://www.demonsoft.org/">http://www.demonsoft.org/</a>&gt;<br/>
-Copyright &copy; 2014 David C Sterratt <david.c.sterratt@ed.ac.uk>
+Copyright &copy; 2014-2019 David C Sterratt <david.c.sterratt@ed.ac.uk>
 </p>
 
 INTRODUCTION
@@ -106,6 +106,16 @@ ACKNOWLEDGEMENTS
 ----------------
 
 The development of Spatial Kappa was funded in part by <a href="http://www.csbe.ed.ac.uk/">SynthSys</a>. SynthSys is a Centre for Integrative Systems Biology (CISB) funded by BBSRC and EPSRC, reference BB/D019621/1.
+
+<img style="width: 200px; float:left" alt="EU flag" src="docs/figs/flag_yellow_low.jpg"/>
+
+This open source software code was developed with funding from the
+European Union Seventh Framework Programme (FP7/2007-2013) under grant
+agreement nos. 241498 (EUROSPIN project), 242167 (SynSys-project) and
+604102 (Human Brain Project), and in the Human Brain Project, funded
+from the European Union’s Horizon 2020 Framework Programme for
+Research and Innovation under Specific Grant Agreements No. 720270 and
+No. 785907 (Human Brain Project SGA1 and SGA2).
 
 
 DISCLAIMER
