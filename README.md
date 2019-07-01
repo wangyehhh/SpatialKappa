@@ -107,7 +107,7 @@ ACKNOWLEDGEMENTS
 
 The development of Spatial Kappa was funded in part by <a href="http://www.csbe.ed.ac.uk/">SynthSys</a>. SynthSys is a Centre for Integrative Systems Biology (CISB) funded by BBSRC and EPSRC, reference BB/D019621/1.
 
-<img style="width: 200px; float:left" alt="EU flag" src="docs/figs/flag_yellow_low.jpg"/>
+<img width=200px align="left" alt="EU flag" src="docs/figs/flag_yellow_low.jpg"/>
 
 This open source software code was developed with funding from the
 European Union Seventh Framework Programme (FP7/2007-2013) under grant
