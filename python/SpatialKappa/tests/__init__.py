@@ -6,18 +6,18 @@ from py4j.protocol import *
 class TestSpatialKappa(unittest.TestCase):
     
     def setUp(self):
-        self.flog = open("/tmp/SpatialKappa-test.log", "w")
+        self.flog = open("SpatialKappa-test.log", "w")
         self.sk = SpatialKappa.SpatialKappa(redirect_stdout=self.flog)
         self.sim = self.sk.kappa_sim("ms", True)
 
     def test_setSeed(self):
-        flog1 = open("/tmp/SpatialKappa-seed-1.log", "w")
+        flog1 = open("SpatialKappa-seed-1.log", "w")
         sk = SpatialKappa.SpatialKappa(redirect_stdout=flog1)
         sim1 = sk.kappa_sim("ms", True, 1)
         sim1.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
         sim1.runForTime(5.0, True)
 
-        flog2 = open("/tmp/SpatialKappa-seed-2.log", "w")
+        flog2 = open("SpatialKappa-seed-2.log", "w")
         sk2 = SpatialKappa.SpatialKappa(redirect_stdout=flog2)
         sim2 = sk2.kappa_sim("ms", True, 1)
         sim2.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
@@ -32,7 +32,7 @@ class TestSpatialKappa(unittest.TestCase):
         sim2 = []
         sk2 = []
 
-        flog3 = open("/tmp/SpatialKappa-seed-3.log", "w")
+        flog3 = open("SpatialKappa-seed-3.log", "w")
         sk = SpatialKappa.SpatialKappa(redirect_stdout=flog3)
         sim = sk.kappa_sim("ms", True)
         sim.loadFile(os.path.dirname(SpatialKappa.__file__) + "/tests/caPump.ka")
